@@ -6,7 +6,7 @@
   <meta name="description" content="早晨和晚上的个人习惯打卡器。">
   <title>早晚打卡</title>
   <link rel="stylesheet" href="vendor/daisyui.css">
-  <link rel="stylesheet" href="styles.css?v=76ccb05588">
+  <link rel="stylesheet" href="styles.css?v=39f6dc1550">
   <script src="vendor/motion.js" defer></script>
   <script src="ritual.js?v=128668773e" defer></script>
   <script src="quotations.js" defer></script>
@@ -181,39 +181,41 @@
         </details>
         <button type="button" class="btn btn-ghost" id="manage-habits" aria-label="管理习惯" title="添加 / 排序">管理</button>
       </div>
-      <details id="supplement-panel" class="collapse collapse-arrow supplement-panel">
-        <summary class="collapse-title">
-          <span class="habit-icon"><svg class="line-icon" aria-hidden="true"><use href="#icon-supplement"></use></svg></span>
-          <span>补品</span><span id="supplement-count" class="badge badge-soft badge-primary supplement-count"></span>
-        </summary>
-        <div class="collapse-content supplement-content">
-          <blockquote class="habit-quote" id="supplement-quote"></blockquote>
-          <p id="supplement-message" hidden></p>
-          <ul id="supplement-items" class="supplement-items"></ul>
-          <button id="manage-supplements" class="btn btn-soft" type="button">管理补品</button>
-        </div>
-      </details>
-      <details id="night-note" class="collapse collapse-arrow note-panel" hidden>
-        <summary class="collapse-title"><span>昨晚小记</span><time class="note-date" id="note-date"></time></summary>
-        <form id="note-form" class="collapse-content note-form">
-          <div class="time-field">
-            <label for="lights-out">大概几点关灯</label>
-            <input class="input" id="lights-out" name="lightsOut" type="time">
+      <div class="daily-tools">
+        <details id="supplement-panel" class="collapse supplement-panel">
+          <summary class="collapse-title">
+            <svg class="line-icon" aria-hidden="true"><use href="#icon-supplement"></use></svg>
+            <span>补品</span><span id="supplement-count" class="supplement-count"></span>
+          </summary>
+          <div class="collapse-content supplement-content">
+            <blockquote class="habit-quote" id="supplement-quote"></blockquote>
+            <p id="supplement-message" hidden></p>
+            <ul id="supplement-items" class="supplement-items"></ul>
+            <button id="manage-supplements" class="btn btn-soft" type="button">管理补品</button>
           </div>
-          <fieldset class="snack-field">
-            <legend>吃夜宵了吗</legend>
-            <div class="snack-options">
-              <label><input name="snack" type="radio" value="yes"> 有</label>
-              <label><input name="snack" type="radio" value="no"> 没有</label>
-              <label><input name="snack" type="radio" value="" checked> 未记录</label>
+        </details>
+        <details id="night-note" class="collapse note-panel" hidden>
+          <summary class="collapse-title"><svg class="line-icon" aria-hidden="true"><use href="#icon-write"></use></svg><span>昨晚小记</span><time class="note-date" id="note-date"></time></summary>
+          <form id="note-form" class="collapse-content note-form">
+            <div class="time-field">
+              <label for="lights-out">大概几点关灯</label>
+              <input class="input" id="lights-out" name="lightsOut" type="time">
             </div>
-          </fieldset>
-          <div class="note-footer">
-            <button class="btn btn-soft" type="submit">保存小记</button>
-            <span id="note-feedback" role="status"></span>
-          </div>
-        </form>
-      </details>
+            <fieldset class="snack-field">
+              <legend>吃夜宵了吗</legend>
+              <div class="snack-options">
+                <label><input name="snack" type="radio" value="yes"> 有</label>
+                <label><input name="snack" type="radio" value="no"> 没有</label>
+                <label><input name="snack" type="radio" value="" checked> 未记录</label>
+              </div>
+            </fieldset>
+            <div class="note-footer">
+              <button class="btn btn-soft" type="submit">保存小记</button>
+              <span id="note-feedback" role="status"></span>
+            </div>
+          </form>
+        </details>
+      </div>
     </div>
     </div>
     <section class="history-view" id="history-view" aria-labelledby="heatmap-title" hidden>
@@ -245,8 +247,8 @@
         </div>
         <p id="heatmap-detail" role="status" class="muted"></p>
       </div>
-      <details id="week-notes" class="collapse collapse-arrow week-notes" hidden>
-        <summary class="collapse-title">近期小记</summary>
+      <details id="week-notes" class="collapse week-notes" hidden>
+        <summary class="collapse-title"><svg class="line-icon" aria-hidden="true"><use href="#icon-write"></use></svg><span>近期小记</span></summary>
         <ul class="collapse-content" id="week-note-list"></ul>
       </details>
     </section>

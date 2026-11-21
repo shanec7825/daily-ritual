@@ -34,6 +34,10 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     assert.equal(await page.locator('#routine-list').evaluate(list => list.open), false);
     assert.equal(await page.locator('#routine-actions').isHidden(), true);
     assert.equal(await page.locator('#supplement-panel > summary').isVisible(), true);
+    for (const id of ['supplement-panel', 'night-note', 'week-notes']) {
+      const marker = await page.locator(`#${id} > summary`).evaluate(summary => getComputedStyle(summary, '::after').content);
+      assert.ok(['none', 'normal'].includes(marker), `${id} 不应再重复显示下拉箭头`);
+    }
     assert.equal(await page.locator('#week-days').count(), 0);
     assert.equal(await page.locator('#action-sketch use').getAttribute('href'), '#drawing-brush');
     await page.locator('#routine-list > summary').click();
@@ -311,7 +315,31 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     await waitForTitle('写作表达');
     const emptyRound = await browser.newPage({ viewport: { width: 320, height: 844 } });
     await emptyRound.goto(baseUrl);
+    await emptyRound.evaluate(() => {
+      const prefix = 'early-evening-ritual.v1/';
+      const today = Ritual.activeDay('morning', new Date());
+      for (let n = 1; n <= 12; n++) {
+        const id = n.toString(16).padStart(24, '0');
+        localStorage.setItem(prefix + 'supplement-settings/' + id, JSON.stringify({name: '补品' + n, mode: 'morning'}));
+        if (n < 12) localStorage.setItem(prefix + today + '/supplement-check/' + id, 'morning');
+      }
+    });
+    await emptyRound.reload();
     await emptyRound.locator('[data-mode-option="morning"]').click();
+    assert.equal(await emptyRound.locator('#supplement-count').innerText(), '11/12');
+    const tools = emptyRound.locator('.daily-tools');
+    const [pack, note] = await Promise.all([tools.locator('#supplement-panel').boundingBox(), tools.locator('#night-note').boundingBox()]);
+    assert.equal(pack.y, note.y, '320px 且有两位数记录时，两个辅助入口仍能并排');
+    await tools.locator('#supplement-panel > summary').click();
+    await tools.locator('#night-note > summary').click();
+    const available = await tools.boundingBox();
+    for (const panel of ['#supplement-panel', '#night-note']) {
+      assert.ok(Math.abs((await tools.locator(panel).boundingBox()).width - available.width) <= 1);
+    }
+    await tools.locator('#lights-out').fill('23:20');
+    await tools.locator('#note-form button').click();
+    await tools.locator('#night-note > summary').click();
+    await tools.locator('#supplement-panel > summary').click();
     for (let i = 0; i < 6; i++) {
       await emptyRound.locator('#action-options summary').click();
       await emptyRound.locator('#skip-action').click();
