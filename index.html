@@ -6,11 +6,11 @@
   <meta name="description" content="早晨和晚上的个人习惯打卡器。">
   <title>早晚打卡</title>
   <link rel="stylesheet" href="vendor/daisyui.css">
-  <link rel="stylesheet" href="styles.css?v=39f6dc1550">
+  <link rel="stylesheet" href="styles.css?v=d07cde8931">
   <script src="vendor/motion.js" defer></script>
-  <script src="ritual.js?v=128668773e" defer></script>
-  <script src="quotations.js" defer></script>
-  <script src="app.js?v=097acc64b3" defer></script>
+  <script src="ritual.js?v=f2b91327e6" defer></script>
+  <script src="quotations.js?v=797436197a" defer></script>
+  <script src="app.js?v=3d91336dfd" defer></script>
 </head>
 <body>
   <svg class="icon-library" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
@@ -133,29 +133,31 @@
     <div class="dashboard">
       <section id="action-card" class="card card-border action-card" aria-labelledby="action-title">
         <div class="action-stage">
-          <svg class="action-sketch" id="action-sketch" viewBox="0 0 120 72" aria-hidden="true" focusable="false"><use href="#drawing-brush"></use></svg>
-          <details class="companion" id="ritual-scene">
-            <summary id="bird-metrics" title="小鸟的成长与喂食" aria-label="小鸟的成长与喂食">
-              <span class="scene-print" aria-hidden="true">
-                <span class="morning-landscape"><i class="rising-sun"></i><i class="distant-hill"></i><i class="near-hill"></i></span>
-                <span class="evening-window"><i class="window-stars"></i><i class="lamplight"></i><i class="window-frame"></i></span>
-                <span class="window-sill"></span><span class="sparrow"></span><i class="grain"></i>
-              </span>
-              <span class="feed-reward" aria-hidden="true"><svg class="line-icon"><use href="#icon-grain"></use></svg>+1</span>
-              <span class="bird-stats" aria-hidden="true">
-                <span><svg class="line-icon"><use href="#icon-feather"></use></svg><span id="bird-days"></span>天</span>
-                <span><svg class="line-icon"><use href="#icon-grain"></use></svg><span id="meal-value"></span></span>
-              </span>
-            </summary>
-            <div class="bird-detail">
-              <p id="bird-growth"></p><p id="meal-count"></p>
-              <p id="completion-feedback" hidden></p>
-              <p class="growth-threshold">累计 7 天长成幼鸟，30 天长成成鸟。</p>
-            </div>
-          </details>
+          <div class="companion" id="ritual-scene">
+            <details class="bird-journal" id="bird-details">
+              <summary id="bird-metrics" title="小鸟的成长与喂食" aria-label="小鸟的成长与喂食">
+                <span class="scene-print" aria-hidden="true">
+                  <span class="habitat">
+                    <span class="garden"></span><i class="daylight"></i><i class="nightfall"></i>
+                    <span class="sparrow"></span><i class="grain"></i>
+                    <span class="feed-reward"><svg class="line-icon"><use href="#icon-grain"></use></svg>+1</span>
+                  </span>
+                </span>
+                <span class="bird-stats" aria-hidden="true">
+                  <span><svg class="line-icon"><use href="#icon-feather"></use></svg><span id="bird-days"></span>天</span>
+                  <span><svg class="line-icon"><use href="#icon-grain"></use></svg><span id="meal-value"></span></span>
+                </span>
+              </summary>
+              <div class="bird-detail" tabindex="-1">
+                <p id="bird-growth"></p><p id="meal-count"></p>
+                <p id="completion-feedback" hidden></p>
+                <p class="growth-threshold">累计 7 天长成幼鸟，30 天长成成鸟。</p>
+              </div>
+            </details>
+          </div>
           <div class="action-primary">
             <div class="action-controls">
-              <h2 id="action-title" tabindex="-1"><button type="button" class="check-button" id="complete-action" aria-pressed="false"><span id="action-name"></span><span class="check-disc" aria-hidden="true"><svg class="line-icon"><use id="complete-glyph" href="#icon-check"></use></svg></span></button><span id="round-title" hidden></span></h2>
+              <h2 id="action-title" tabindex="-1"><button type="button" class="check-button" id="complete-action" aria-pressed="false"><svg class="action-sketch" id="action-sketch" viewBox="0 0 120 72" aria-hidden="true" focusable="false"><use href="#drawing-brush"></use></svg><span id="action-name"></span><span class="check-disc" aria-hidden="true"><svg class="line-icon"><use id="complete-glyph" href="#icon-check"></use></svg></span></button><span id="round-title" hidden></span></h2>
               <details id="action-options" class="action-options">
                 <summary class="btn btn-ghost btn-circle" aria-label="本项选项"><svg class="line-icon" aria-hidden="true"><use href="#icon-dots"></use></svg></summary>
                 <div class="action-tools">
@@ -168,8 +170,8 @@
             <button type="button" class="btn btn-soft btn-sm breath-link" id="start-breath" hidden>呼吸引导</button>
           </div>
         </div>
-        <blockquote class="habit-quote" id="habit-quote"></blockquote>
       </section>
+      <aside class="habit-quote" id="habit-quote"></aside>
       <div class="routine-strip">
         <details class="routine-panel" id="routine-list">
           <summary class="routine-heading" title="习惯清单">
@@ -188,7 +190,7 @@
             <span>补品</span><span id="supplement-count" class="supplement-count"></span>
           </summary>
           <div class="collapse-content supplement-content">
-            <blockquote class="habit-quote" id="supplement-quote"></blockquote>
+            <div class="habit-quote" id="supplement-quote"></div>
             <p id="supplement-message" hidden></p>
             <ul id="supplement-items" class="supplement-items"></ul>
             <button id="manage-supplements" class="btn btn-soft" type="button">管理补品</button>

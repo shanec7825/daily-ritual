@@ -24,6 +24,27 @@ const Ritual = (() => {
     ]
   };
 
+  const journalLanguages = [
+    { lang: "es", prompts: {
+      stretch: "Un estiramiento cómodo.", read: "Basta una página.", write: "Una idea, en voz alta o por escrito.",
+      walk: "Un paseo lejos de la pantalla.", desk: "Con guardar una cosa basta."
+    } },
+    { lang: "en", prompts: {
+      stretch: "A stretch that feels good.", read: "Just one page.", write: "One thought, spoken or written.",
+      walk: "A walk away from the screen.", desk: "Put one thing away."
+    } },
+    { lang: "ja", prompts: {
+      stretch: "心地よく、ひと伸び。", read: "一ページだけ。", write: "ひとつの考えを、声か文字に。",
+      walk: "画面を離れて、少し歩く。", desk: "ひとつだけ、片づける。"
+    } }
+  ];
+
+  function journalLanguage(day) {
+    const dayNumber = Date.parse(day + "T00:00:00Z") / 86400000;
+    const count = journalLanguages.length;
+    return journalLanguages[((dayNumber % count) + count) % count];
+  }
+
   function dateKey(date) {
     return [date.getFullYear(), date.getMonth() + 1, date.getDate()]
       .map((part, index) => String(part).padStart(index === 0 ? 4 : 2, "0"))
@@ -219,5 +240,5 @@ const Ritual = (() => {
     actions[field] = entry;
   }
 
-  return { routines, getSteps, roundProgress, nextAction, heatmap, recentHabitDays, companionGrowth, offsetDay, activeDay, defaultMode, getActions, currentAction, saveAction, saveNote, supplementChecks, setSupplementCheck, weekEnding, readEntry };
+  return { routines, journalLanguage, getSteps, roundProgress, nextAction, heatmap, recentHabitDays, companionGrowth, offsetDay, activeDay, defaultMode, getActions, currentAction, saveAction, saveNote, supplementChecks, setSupplementCheck, weekEnding, readEntry };
 })();

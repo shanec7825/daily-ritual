@@ -19,14 +19,82 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     const sceneProgress = () => page.locator('#ritual-scene').evaluate(el => Number(getComputedStyle(el).getPropertyValue('--progress')));
     assert.equal(await page.locator('#history-view').isHidden(), true);
     assert.equal(await page.locator('#top-date').getAttribute('datetime'), '2026-11-20');
-    assert.equal(await page.locator('#top-weekday').textContent(), '星期五');
+    assert.equal(await page.locator('#top-weekday').textContent(), '金曜日');
     await page.locator('[data-mode-option="morning"]').click();
     assert.equal(await page.locator('#action-title').textContent(), '刷牙');
     assert.equal(await feedback.evaluate(el => el.hidden), true);
     assert.equal(await sceneProgress(), 0);
     const quote = page.locator('#habit-quote');
-    assert.equal(await quote.count(), 1, '本地打卡页应展示原有的习惯名言');
-    assert.equal(await quote.locator('cite').innerText(), '《诗经·卫风·淇奥》');
+    assert.equal(await quote.count(), 1);
+    for (const [period, file] of [['evening', 'garden-evening.webp'], ['morning', 'garden-perch.webp']]) {
+      await page.locator(`[data-mode-option="${period}"]`).click();
+      const asset = await page.locator('.garden').evaluate(async el => {
+        const image = new Image();
+        image.src = getComputedStyle(el).backgroundImage.match(/url\("([^"]+)"\)/)[1];
+        await image.decode();
+        return [new URL(image.src).pathname.split('/').pop(), image.naturalWidth];
+      });
+      assert.equal(asset[0], file);
+      assert.ok(asset[1] > 0);
+    }
+    const notes = await page.evaluate(() => {
+      const sample = document.createElement('div');
+      return Array.from({length: 12}, (_, i) => {
+        RitualQuotes.show(sample, 'read', 'morning', Ritual.offsetDay('2026-11-22', i));
+        return {text: sample.firstElementChild.textContent, kind: sample.firstElementChild.tagName,
+          source: sample.querySelector('cite a').href, label: sample.querySelector('cite').textContent};
+      });
+    });
+    assert.equal(notes[0].source, 'https://pubmed.ncbi.nlm.nih.gov/16507066/');
+    assert.match(notes[0].text, /一周后/);
+    assert.ok(notes.some(entry => entry.kind === 'BLOCKQUOTE' && entry.label.includes('陶渊明')));
+    assert.ok(notes.filter(entry => entry.kind === 'P').every(entry => entry.label.startsWith('研究摘记') && entry.source.startsWith('https:')));
+    assert.ok(new Set(notes.map(entry => entry.source)).size >= 5);
+    const languages = await browser.newPage({viewport: {width: 390, height: 844}, timezoneId: 'Asia/Shanghai'});
+    for (const [date, lang, weekday, hint] of [
+      ['2026-11-22', 'en', 'Sunday', 'Just one page.'],
+      ['2026-11-23', 'ja', '月曜日', '一ページだけ。'],
+      ['2026-11-24', 'es', 'martes', 'Basta una página.']
+    ]) {
+      await languages.clock.setFixedTime(new Date(date + 'T10:00:00+08:00'));
+      await languages.goto(baseUrl);
+      await languages.locator('[data-mode-option="morning"]').click();
+      assert.equal(await languages.locator('#top-weekday').innerText(), weekday);
+      assert.equal(await languages.locator('#top-weekday').getAttribute('lang'), lang);
+      assert.ok(await languages.locator('#action-description').isHidden(), '刷牙原本没有提示，仍只显示动作名');
+      await languages.locator('#routine-list > summary').click();
+      await languages.locator('[data-step="read"]').click();
+      assert.equal(await languages.locator('#action-name').innerText(), '阅读');
+      assert.equal(await languages.locator('#action-description').innerText(), hint);
+      assert.equal(await languages.locator('#action-description').getAttribute('lang'), lang);
+    }
+    await languages.close();
+    for (const [width, height] of [[360, 740], [390, 844], [430, 932]]) {
+      await page.setViewportSize({width, height});
+      const button = await primaryPosition();
+      const center = (button.y + button.height / 2) / height;
+      assert.ok(center >= .60 && center <= .76, `${width}×${height} 的打卡位置应在屏幕中下部，实际为 ${Math.round(center * 100)}%`);
+      const note = await quote.boundingBox();
+      assert.ok(note.y >= button.y + button.height && note.y < height, '先打卡，摘记随后出现在手机首屏');
+    }
+    for (const [width, height] of [[568, 320], [844, 390]]) {
+      await page.setViewportSize({width, height});
+      const [note, button] = await Promise.all([quote.boundingBox(), primaryPosition()]);
+      assert.ok(button.x + button.width <= note.x && button.y + button.height <= height, '横屏时摘记和打卡并排，按钮在首屏');
+      await page.locator('.sparrow').tap();
+      await page.locator('.growth-threshold').tap();
+      assert.ok(await page.locator('#bird-growth').isVisible(), '可以在短横屏上点读成长详情');
+      await page.keyboard.press('Escape');
+      assert.equal(await page.evaluate(() => document.activeElement.id), 'bird-metrics');
+      await page.locator('.sparrow').tap();
+      await page.locator('.sparrow').tap();
+      assert.ok(await page.locator('#bird-growth').isHidden(), '详情打开时也能再次点到小鸟');
+    }
+    await page.setViewportSize({width: 320, height: 568});
+    await page.evaluate(() => document.documentElement.style.fontSize = '200%');
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), '放大文字后 320px 也能自然换行');
+    await page.evaluate(() => document.documentElement.style.removeProperty('font-size'));
+    await page.setViewportSize({width: 390, height: 844});
     const firstButton = await primaryPosition();
     assert.equal((await page.locator('#complete-action').innerText()).trim(), '刷牙', '主操作只显示当前动作名称和对勾');
     assert.equal(await page.locator('#complete-action').getAttribute('aria-label'), '完成 · 刷牙');
@@ -43,7 +111,7 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     await page.locator('#routine-list > summary').click();
     assert.equal(await page.locator('.sparrow').isVisible(), true);
     await page.locator('#supplement-panel > summary').click();
-    await page.waitForFunction(() => document.querySelector('#supplement-quote cite')?.innerText === '《道德经》第六十四章');
+    assert.match(await page.locator('#supplement-quote cite a').getAttribute('href'), /^https:\/\//);
     await page.locator('#supplement-panel > summary').click();
     const reward = page.locator('.feed-reward');
     assert.equal(await reward.evaluate(el => getComputedStyle(el).opacity), '0');
@@ -52,6 +120,14 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     const birdButton = page.locator('#bird-metrics');
     assert.equal(await growth.isVisible(), false);
     assert.deepEqual(await page.locator('.bird-stats > span').allTextContents(), ['0天', '0']);
+    await page.locator('.sparrow').tap();
+    assert.ok(await growth.isVisible(), '点小鸟本身可以查看成长');
+    await page.locator('.sparrow').tap();
+    assert.ok(await growth.isHidden());
+    await page.locator('.bird-stats').tap();
+    await page.locator('#action-options summary').tap();
+    assert.ok(await growth.isHidden() && await page.locator('#skip-action').isVisible());
+    await page.keyboard.press('Escape');
     await birdButton.tap();
     assert.equal(await growth.isVisible(), true);
     await page.keyboard.press('Escape');
@@ -61,14 +137,15 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     for (const width of [320, 390, 768, 1280]) {
       await page.setViewportSize({width, height: 844});
       const card = await page.locator('#action-card').boundingBox();
-      const bird = await page.locator('#ritual-scene').boundingBox();
+      const bird = await page.locator('.sparrow').boundingBox();
       const sketch = await page.locator('#action-sketch').boundingBox();
       const quoteBox = await quote.boundingBox();
       const print = await page.locator('.scene-print').boundingBox();
       const caption = await page.locator('.bird-stats').boundingBox();
-      assert.ok(bird.x >= sketch.x + sketch.width && bird.width <= card.width * 0.4);
-      assert.ok(print.width >= bird.width - 1 && caption.y >= print.y + print.height - 1);
-      assert.ok(bird.y + bird.height <= quoteBox.y + 1);
+      assert.ok(bird.x >= print.x && bird.x + bird.width <= print.x + print.width && bird.y + bird.height <= print.y + print.height, '小鸟完整落在窗台插画中');
+      assert.ok(bird.width >= 100 && caption.y >= print.y && caption.y + caption.height <= print.y + print.height);
+      assert.ok(sketch.y >= print.y + print.height && sketch.y - print.y - print.height < 50, '动作和插画应相邻');
+      assert.ok(width < 760 ? quoteBox.y >= card.y + card.height : quoteBox.x >= card.x + card.width, '摘记位于打卡区下方或桌面页边');
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
       await page.locator('[data-mode-option="evening"]').click();
       let previous;
@@ -116,7 +193,7 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     assert.equal(await feedback.innerText(), '刷牙已完成 · 喂食 +1 粒');
     assert.match(await birdButton.getAttribute('aria-label'), /累计 1 天，今晨已喂 1 粒/);
     await page.keyboard.press('Escape');
-    assert.equal(await quote.locator('cite').innerText(), '陶渊明《饮酒·其五》');
+    assert.match(await quote.locator('cite a').getAttribute('href'), /^https:\/\//);
     assert.equal(await sceneProgress(), 1 / 6);
     await page.locator('#night-note > summary').click();
     await page.locator('#lights-out').fill('23:10');
@@ -124,10 +201,12 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     await page.locator('#action-options summary').click();
     await page.locator('#skip-action').click();
     assert.equal(await page.locator('#action-title').textContent(), '阅读');
+    const beforeReload = await quote.innerText();
     await page.reload();
     assert.equal(await page.locator('#action-title').textContent(), '阅读');
+    assert.equal(await quote.innerText(), beforeReload, '同一天重开仍是这条摘记');
     assert.equal(await feedback.textContent(), '刷牙已完成 · 喂食 +1 粒');
-    assert.equal(await quote.locator('.translation').innerText(), '在一粒沙里，看见一个世界。');
+    assert.match(await quote.locator('cite a').getAttribute('href'), /^https:\/\//);
     assert.equal(await growth.textContent(), '雏鸟 · 累计 1 天');
     if (!await page.locator('#routine-list').evaluate(list => list.open)) await page.locator('#routine-list > summary').click();
     await page.locator('#manage-habits').click();
@@ -164,6 +243,18 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     assert.equal(await page.locator('.heat-cell').count(), 30);
     for (const theme of ['evening', 'morning']) {
       await page.locator(`[data-mode-option="${theme}"]`).click();
+      const select = page.locator('#history-habit');
+      await select.tap();
+      const surface = await select.evaluate(el => ({
+        opened: el.matches(':open'),
+        field: getComputedStyle(el).backgroundColor,
+        popup: getComputedStyle(el, '::picker(select)').backgroundColor,
+        paper: getComputedStyle(el.closest('.heatmap-panel')).backgroundColor
+      }));
+      assert.ok(surface.opened, '应实际展开原生选项后检查弹层');
+      assert.equal(surface.field, surface.paper);
+      assert.equal(surface.popup, surface.paper, `${theme} 展开选项必须遮住日历`);
+      await page.keyboard.press('Escape');
       const contrast = await page.locator('.heatmap-panel').evaluate(panel => {
         const luminance = cssColor => {
           const [r, g, b] = cssColor.match(/\d+/g).slice(0, 3).map(Number).map(value => value / 255)
@@ -177,7 +268,14 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
       });
       assert.ok(contrast >= 3, `${theme} 模式空心日期与纸面的对比度 ${contrast}`);
     }
-    await page.locator('#history-habit').selectOption('brush');
+    const historySelect = page.locator('#history-habit');
+    await historySelect.focus();
+    await page.keyboard.press('Space');
+    await page.keyboard.press('Home');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('Enter');
+    assert.deepEqual(await historySelect.evaluate(el => [el.matches(':open'), el.selectedIndex]), [false, 1]);
+    await historySelect.selectOption('brush');
     await page.emulateMedia({ forcedColors: 'active' });
     const todayMark = await page.locator('button.heat-cell[aria-current="date"]').evaluate(cell =>
       getComputedStyle(cell, '::after').backgroundColor !== getComputedStyle(cell.closest('.heatmap-panel')).backgroundColor);
@@ -388,6 +486,6 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     assert.equal(await keyboard.locator('#meal-count').textContent(), '今晨已喂 2 粒');
     await keyboard.close();
     assert.deepEqual(errors, []);
-    console.log('PASS: sourced quotes, corner layout, feeding poses, instant save, progression and undo, reduced-motion feedback, growth from old records, habit settings, history navigation and drill-down, cross-tab and supplement history, 320/390/768/1280 layouts, no page errors');
+    console.log('PASS: illustrated morning and evening scenes, one-tap check-in, bird details and feeding, sourced reading notes, reduced motion, growth and undo, opaque history picker, mobile and desktop layouts, storage and history regressions');
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

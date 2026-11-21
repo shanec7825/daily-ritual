@@ -11,6 +11,7 @@
   const undoSkip = byId("undo-skip");
   const actionOptions = byId("action-options");
   const scene = byId("ritual-scene");
+  const birdDetails = byId("bird-details");
   const feedback = byId("completion-feedback");
   const actionSketch = byId("action-sketch");
   const motionPreference = matchMedia("(prefers-reduced-motion: no-preference)");
@@ -29,7 +30,6 @@
   const historyGrid = byId("habit-heatmap");
   const historyDetail = byId("heatmap-detail");
   const displayDate = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric" });
-  const displayWeekday = new Intl.DateTimeFormat("zh-CN", { weekday: "long" });
   const shortDate = new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric" });
   const asDate = key => new Date(`${key}T12:00:00`);
 
@@ -176,7 +176,9 @@
     for (const button of modeOptions) button.setAttribute("aria-pressed", String(mode === button.dataset.modeOption));
     byId("top-date").dateTime = day;
     byId("top-month-day").textContent = displayDate.format(asDate(day));
-    byId("top-weekday").textContent = displayWeekday.format(asDate(day));
+    const weekday = byId("top-weekday");
+    weekday.lang = Ritual.journalLanguage(day).lang;
+    weekday.textContent = asDate(day).toLocaleDateString(weekday.lang, { weekday: "long" });
     renderAction();
     renderSupplements();
     if (supplementDialog.open) renderSupplementSettings();
@@ -203,7 +205,10 @@
     const drawing = finished || step.id.startsWith("custom-") ? "sprig" : step.id;
     actionSketch.firstElementChild.setAttribute("href", "#drawing-" + drawing);
     const description = byId("action-description");
-    description.textContent = (done ? step.done : status === "skipped" ? "已跳过，可随时补做。" : step.prompt) ?? "";
+    const language = Ritual.journalLanguage(day);
+    const translated = !status && step.prompt && language.prompts[step.id];
+    description.lang = translated ? language.lang : "zh-CN";
+    description.textContent = (done ? step.done : status === "skipped" ? "已跳过，可随时补做。" : translated || step.prompt) ?? "";
     description.hidden = !description.textContent;
     complete.setAttribute("aria-pressed", String(done));
     complete.title = completion ? "已完成" : done ? "撤销完成" : "完成";
@@ -452,7 +457,7 @@
     if (focus && showHistory === !historyView.hidden) return;
     clearCompletion();
     if (showHistory) {
-      scene.open = false;
+      birdDetails.open = false;
       actionOptions.open = false;
       for (const dialog of [habitDialog, supplementDialog, breathDialog]) {
         if (dialog.open) dialog.close();
@@ -795,7 +800,7 @@
     focusAction();
   });
 
-  const disclosures = [actionOptions, scene];
+  const disclosures = [actionOptions, birdDetails];
   document.addEventListener("pointerdown", event => {
     for (const panel of disclosures) {
       if (panel.open && !panel.contains(event.target)) panel.open = false;
@@ -809,7 +814,7 @@
       }
     });
     panel.addEventListener("focusout", event => {
-      if (!panel.contains(event.relatedTarget)) panel.open = false;
+      if (event.relatedTarget && !panel.contains(event.relatedTarget)) panel.open = false;
     });
   }
 
