@@ -12,7 +12,7 @@
   const actionOptions = byId("action-options");
   const scene = byId("ritual-scene");
   const feedback = byId("completion-feedback");
-  const actionCopy = byId("action-copy");
+  const actionSketch = byId("action-sketch");
   const motionPreference = matchMedia("(prefers-reduced-motion: no-preference)");
   const moving = new Map();
   const supplementPanel = byId("supplement-panel");
@@ -28,11 +28,9 @@
   const historyHabit = byId("history-habit");
   const historyGrid = byId("habit-heatmap");
   const historyDetail = byId("heatmap-detail");
-  const longDate = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "long" });
   const displayDate = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric" });
   const displayWeekday = new Intl.DateTimeFormat("zh-CN", { weekday: "long" });
   const shortDate = new Intl.DateTimeFormat("zh-CN", { month: "numeric", day: "numeric" });
-  const weekday = new Intl.DateTimeFormat("zh-CN", { weekday: "short" });
   const asDate = key => new Date(`${key}T12:00:00`);
 
   let timeBand = Ritual.defaultMode(new Date());
@@ -43,12 +41,13 @@
   let canPersist = true;
   let lastSkip;
   let completion;
+  let grainTimer;
   let breathTimer;
   let breathStart;
   let noteContext;
   let noteBaseline;
   let editingSupplement;
-  let historyRange = "week";
+  let historyRange = "month";
   let historyOffset = 0;
   let historyDay;
   const habitDialog = byId("habit-dialog");
@@ -87,6 +86,7 @@
   function updateAction(id, status, expectedStatus) {
     load();
     const actions = Ritual.getActions(store, day, mode);
+    if (actions[id]?.status === status) return false;
     if (expectedStatus && actions[id]?.status !== expectedStatus) return false;
     Ritual.saveAction(store, day, mode, id, status);
     const entry = Ritual.getActions(store, day, mode)[id];
@@ -134,19 +134,21 @@
   }
 
   function revealAction(direction = 1) {
-    animateUI(actionCopy, {
+    animateUI(actionSketch, {
       opacity: [0.45, 1],
       transform: [`translateX(${direction * 10}px)`, "translateX(0px)"]
     }, { duration: 0.26, ease: [0.2, 0.65, 0.3, 1] });
   }
 
   function confirmAction() {
-    animateUI(complete, {
-      opacity: [0.5, 1], transform: ["scale(.86)", "scale(1)"]
+    animateUI(complete.querySelector(".check-disc"), {
+      opacity: [0.5, 1], transform: ["scale(.985)", "scale(1)"]
     }, { duration: 0.19, ease: "easeOut" });
   }
 
   function clearCompletion() {
+    clearTimeout(grainTimer);
+    delete scene.dataset.instantGrain;
     if (!completion) return;
     clearTimeout(completion.timer);
     const actions = Ritual.getActions(store, day, mode);
@@ -162,7 +164,10 @@
       renderAction();
       revealAction();
     }
-    if (returnFocus && !byId("daily-view").hidden) focusAction();
+    if (returnFocus && !byId("daily-view").hidden) {
+      if (complete.hidden) focusAction();
+      else announce("下一项，" + title.textContent);
+    }
   }
 
   function render({ refreshNote = false } = {}) {
@@ -176,7 +181,7 @@
     renderSupplements();
     if (supplementDialog.open) renderSupplementSettings();
     renderNote(refreshNote);
-    renderWeek();
+    renderRecentNotes();
     if (!historyView.hidden) renderHeatmap();
     if (habitDialog.open) renderHabitSettings();
   }
@@ -191,13 +196,21 @@
     if (lastSkip && actions[lastSkip]?.status !== "skipped") lastSkip = undefined;
     const finished = step.id === "finished";
     byId("action-card").dataset.state = finished && choices.length ? "finished" : status ?? "ready";
-    title.textContent = step.title;
+    byId("action-name").textContent = finished ? "" : step.title;
+    const roundTitle = byId("round-title");
+    roundTitle.hidden = !finished;
+    roundTitle.textContent = finished ? step.title : "";
+    const drawing = finished || step.id.startsWith("custom-") ? "sprig" : step.id;
+    actionSketch.firstElementChild.setAttribute("href", "#drawing-" + drawing);
     const description = byId("action-description");
     description.textContent = (done ? step.done : status === "skipped" ? "已跳过，可随时补做。" : step.prompt) ?? "";
     description.hidden = !description.textContent;
-    complete.setAttribute("aria-label", `${step.label}打卡`);
     complete.setAttribute("aria-pressed", String(done));
-    complete.title = done ? "撤销完成" : "完成";
+    complete.title = completion ? "已完成" : done ? "撤销完成" : "完成";
+    byId("complete-glyph").setAttribute("href", done && !completion ? "#icon-undo" : "#icon-check");
+    complete.setAttribute("aria-label", completion ? `${step.label}已完成，已喂一粒谷物` : `${complete.title} · ${step.label}`);
+    scene.classList.toggle("feeding", Boolean(completion));
+    if (scene.dataset.instantGrain && actions[scene.dataset.instantGrain]?.status !== "done") delete scene.dataset.instantGrain;
     if (completion) complete.setAttribute("aria-disabled", "true");
     else complete.removeAttribute("aria-disabled");
     complete.disabled = finished;
@@ -208,15 +221,28 @@
     undoSkip.hidden = !lastSkip;
     actionOptions.hidden = skip.hidden && undoSkip.hidden;
     if (actionOptions.contains(focused) && (actionOptions.hidden || focused.hidden)) {
-      const fallback = actionOptions.hidden ? complete : actionOptions.querySelector("summary");
+      const fallback = actionOptions.hidden ? (finished ? title : complete) : actionOptions.querySelector("summary");
       fallback.focus({ preventScroll: true });
     }
 
-    const { done: doneCount, latest } = Ritual.roundProgress(choices, actions);
+    const { done: doneCount } = Ritual.roundProgress(choices, actions);
+    const { done: meals, latest } = Ritual.roundProgress(Ritual.getSteps(store, mode, true), actions);
+    scene.classList.toggle("has-meals", meals > 0);
+    RitualQuotes.show(byId("habit-quote"), finished ? latest?.id ?? "general" : step.id, mode, day);
+    const growth = Ritual.companionGrowth(store, Ritual.activeDay("morning", new Date()));
+    scene.dataset.stage = growth.stage;
+    byId("bird-days").textContent = growth.days;
+    byId("meal-value").textContent = meals;
+    const growthLabel = `${growth.label} · 累计 ${growth.days} 天`;
+    byId("bird-growth").textContent = growthLabel;
     scene.style.setProperty("--progress", choices.length ? doneCount / choices.length : 0);
     feedback.hidden = !latest;
     const period = mode === "morning" ? "今晨" : "今晚";
-    feedback.textContent = latest ? `刚完成「${latest.label}」${finished ? "" : ` · ${period} ${doneCount}/${choices.length}`}` : "";
+    const mealLabel = `${period}已喂 ${meals} 粒`;
+    byId("meal-count").textContent = mealLabel;
+    byId("bird-metrics").setAttribute("aria-label", `小鸟成长与喂食，${growthLabel}，${mealLabel}`);
+    const fedHabit = completion ? step : latest;
+    feedback.textContent = fedHabit ? `${fedHabit.label}已完成 · 喂食 +1 粒` : "";
     const meter = byId("routine-meter");
     meter.max = Math.max(1, choices.length);
     meter.value = doneCount;
@@ -277,6 +303,7 @@
   }
 
   function renderSupplements() {
+    RitualQuotes.show(byId("supplement-quote"), "supplement", mode, day);
     const configured = Object.entries(store.supplements);
     const active = configured.filter(([, item]) => item.mode === mode && !item.paused);
     const checks = Ritual.supplementChecks(store, day);
@@ -364,34 +391,8 @@
     byId("note-feedback").textContent = "";
   }
 
-  function renderWeek() {
-    const week = Ritual.weekEnding(store, day);
-    const total = week.reduce((sum, date) => sum + date.morning + date.evening, 0);
-    const deskCount = week.filter(date => date.desk).length;
-    const summary = byId("week-summary");
-    summary.textContent = total ? `完成 ${total} 件小事${deskCount ? ` · 收过桌面 ${deskCount} 次` : ""}` : "";
-    summary.hidden = !summary.textContent;
-    byId("week-days").replaceChildren(...week.map(date => {
-      const cell = document.createElement("li");
-      const label = document.createElement("time");
-      const marks = document.createElement("span");
-      const fullLabel = document.createElement("span");
-      const morning = document.createElement("i");
-      const evening = document.createElement("i");
-      if (date.day === day) cell.setAttribute("aria-current", "date");
-      setDate(label, date.day, weekday);
-      label.setAttribute("aria-hidden", "true");
-      marks.className = "marks";
-      marks.setAttribute("aria-hidden", "true");
-      morning.className = date.morning ? "morning-dot" : "";
-      evening.className = date.evening ? "evening-dot" : "";
-      marks.append(morning, evening);
-      fullLabel.className = "sr-only";
-      fullLabel.textContent = `${longDate.format(asDate(date.day))}，早晨 ${date.morning} 件，晚上 ${date.evening} 件`;
-      cell.append(label, marks, fullLabel);
-      return cell;
-    }));
-    const notes = week.filter(date => date.note).reverse();
+  function renderRecentNotes() {
+    const notes = Ritual.weekEnding(store, day).filter(date => date.note).reverse();
     byId("week-notes").hidden = notes.length === 0;
     byId("week-note-list").replaceChildren(...notes.map(date => {
       const row = document.createElement("li");
@@ -451,6 +452,7 @@
     if (focus && showHistory === !historyView.hidden) return;
     clearCompletion();
     if (showHistory) {
+      scene.open = false;
       actionOptions.open = false;
       for (const dialog of [habitDialog, supplementDialog, breathDialog]) {
         if (dialog.open) dialog.close();
@@ -482,61 +484,79 @@
     return items;
   }
 
-  function calendarGrid(cells, item, compact = false) {
+  function calendarGrid(cells, item) {
     const grid = document.createElement("div");
     grid.className = "heatmap-grid";
-    if (compact) grid.setAttribute("aria-hidden", "true");
-    const first = cells[0].day;
-    const offset = historyRange === "week" ? 0 : (asDate(first).getDay() + 6) % 7;
-    if (!compact) {
-      for (let index = 0; index < 7; index++) {
-        const heading = document.createElement("span");
-        heading.className = "calendar-weekday";
-        heading.textContent = weekday.format(asDate(Ritual.offsetDay(first, index - offset)));
-        grid.append(heading);
-      }
+    const firstWeekday = asDate(cells[0].day).getDay();
+    const offset = historyRange === "week" ? 0 : (firstWeekday + 6) % 7;
+    for (let column = 0; column < 7; column++) {
+      const heading = document.createElement("span");
+      heading.className = "calendar-weekday";
+      heading.textContent = "日一二三四五六"[(firstWeekday - offset + column + 7) % 7];
+      grid.append(heading);
     }
     cells.forEach((cell, index) => {
-      const tile = document.createElement(compact ? "span" : "button");
-      tile.className = `heat-cell${cell.done ? " done" : ""}${cell.future ? " future" : ""}`;
+      const tile = document.createElement("button");
+      tile.type = "button";
+      tile.className = cellClass(cell);
+      tile.dataset.day = cell.day;
+      tile.disabled = cell.future;
       if (index === 0) tile.style.gridColumnStart = offset + 1;
-      if (!compact) {
-        tile.type = "button";
-        tile.dataset.day = cell.day;
-        const label = `${cell.day} · ${item.title} · ${cell.future ? "未来" : cell.done ? "已完成" : "未完成"}`;
-        tile.setAttribute("aria-label", label);
-        tile.setAttribute("aria-pressed", String(historyDay === cell.day));
-        if (historyDay === cell.day) historyDetail.textContent = label;
-        if (cell.day === day) tile.setAttribute("aria-current", "date");
-        tile.textContent = String(asDate(cell.day).getDate());
-        if (cell.done) tile.append(icon("check"));
-      }
+      const state = cell.future ? "未来" : cell.done ? "已完成" : "未记录";
+      const label = `${cell.day} · ${item.title} · ${state}`;
+      tile.setAttribute("aria-label", label);
+      tile.setAttribute("aria-pressed", String(historyDay === cell.day));
+      if (historyDay === cell.day) historyDetail.textContent = label;
+      if (cell.day === day) tile.setAttribute("aria-current", "date");
+      const number = document.createElement("span");
+      number.className = "date-number";
+      number.textContent = Number(cell.day.slice(8));
+      tile.append(number);
       grid.append(tile);
     });
     return grid;
   }
 
-  function yearCalendar(cells, item, base) {
+  function cellClass(cell) {
+    return cell.future ? "heat-cell future" : cell.done ? "heat-cell done" : "heat-cell";
+  }
+
+  function yearCalendar(cells, base) {
     const year = document.createElement("div");
     year.className = "year-calendar";
-    for (let month = 0; month < 12; month++) {
-      const prefix = `${String(month + 1).padStart(2, "0")}-`;
-      const monthCells = cells.filter(cell => cell.day.slice(5).startsWith(prefix));
+    const axis = document.createElement("div");
+    axis.className = "year-axis";
+    axis.setAttribute("aria-hidden", "true");
+    for (const date of [1, 5, 10, 15, 20, 25, 31]) {
+      const tick = document.createElement("span");
+      tick.style.gridColumn = date + 1;
+      tick.textContent = date;
+      axis.append(tick);
+    }
+    year.append(axis);
+    const months = Array.from({ length: 12 }, () => []);
+    for (const cell of cells) months[Number(cell.day.slice(5, 7)) - 1].push(cell);
+    months.forEach((monthCells, index) => {
       const button = document.createElement("button");
-      const heading = document.createElement("span");
-      const count = document.createElement("span");
-      count.textContent = `${monthCells.filter(cell => cell.done).length} 天`;
-      heading.className = "month-heading";
-      heading.textContent = `${month + 1} 月`;
-      heading.append(count);
       button.type = "button";
       button.className = "mini-month";
-      button.dataset.monthOffset = historyOffset * 12 + month - base.getMonth();
+      button.dataset.monthOffset = historyOffset * 12 + index - base.getMonth();
       button.disabled = monthCells[0].future;
-      if (!button.disabled) button.setAttribute("aria-label", `查看 ${month + 1} 月，已完成 ${count.textContent}`);
-      button.append(heading, calendarGrid(monthCells, item, true));
+      if (monthCells[0].day.slice(0, 7) === day.slice(0, 7)) button.setAttribute("aria-current", "date");
+      const label = document.createElement("span");
+      label.className = "month-heading";
+      label.textContent = `${index + 1}月`;
+      const done = monthCells.filter(cell => cell.done).length;
+      button.setAttribute("aria-label", `${label.textContent}，${button.disabled ? "未来" : "已记 " + done + " 天，查看月历"}`);
+      button.append(label);
+      for (const cell of monthCells) {
+        const dot = document.createElement("span");
+        dot.className = cellClass(cell);
+        dot.setAttribute("aria-hidden", "true");
+        button.append(dot);
+      }
       year.append(button);
-    }
+    });
     return year;
   }
 
@@ -562,20 +582,25 @@
     historyHabit.disabled = !item;
     historyDetail.textContent = "";
     const total = byId("heatmap-total");
-    const hint = byId("heatmap-hint");
+    const consistency = byId("habit-consistency");
     if (!item) {
       total.textContent = "暂无习惯记录";
-      hint.textContent = "";
+      consistency.textContent = "";
       historyGrid.replaceChildren();
       return;
     }
     historyHabit.value = item.id;
+    const recent = Ritual.recentHabitDays(store, mode, item.id, end);
+    const windowLabel = historyOffset ? `截至 ${shortDate.format(asDate(end))} 的 28 天` : "近 28 天";
+    consistency.textContent = `${windowLabel}已记 ${recent} 天`;
     const cells = Ritual.heatmap(store, mode, item.id, end, historyRange);
     const count = document.createElement("strong");
     count.textContent = cells.filter(cell => cell.done).length;
-    total.replaceChildren(count, " 天已完成");
-    hint.textContent = historyRange === "year" ? "点选月份查看每天的记录。" : "点选日期查看记录。";
-    historyGrid.replaceChildren(historyRange === "year" ? yearCalendar(cells, item, base) : calendarGrid(cells, item));
+    total.replaceChildren("已记 ", count, " 天");
+    const focused = historyGrid.contains(document.activeElement) ? document.activeElement.dataset : null;
+    historyGrid.replaceChildren(historyRange === "year" ? yearCalendar(cells, base) : calendarGrid(cells, item));
+    if (focused?.day) historyGrid.querySelector(`[data-day="${focused.day}"]`)?.focus({ preventScroll: true });
+    else if (focused?.monthOffset !== undefined) historyGrid.querySelector(`[data-month-offset="${focused.monthOffset}"]`)?.focus({ preventScroll: true });
   }
 
   byId("manage-habits").addEventListener("click", () => {
@@ -711,22 +736,33 @@
     });
   }
 
-  complete.addEventListener("click", () => {
-    if (syncDay() || completion) return;
+  complete.addEventListener("keydown", event => {
+    if (event.repeat && (event.key === "Enter" || event.key === " ")) event.preventDefault();
+  });
+
+  complete.addEventListener("click", event => {
+    if (syncDay() || completion || event.detail > 1) return;
     const step = getStep();
     if (step.id === "finished") return;
     const done = complete.getAttribute("aria-pressed") === "true";
+    const wasFocused = document.activeElement === complete;
     const updated = updateAction(step.id, done ? undefined : "done", done ? "done" : undefined);
     lastSkip = undefined;
     actionOptions.open = false;
     if (updated && !done && motionPreference.matches) {
-      completion = { id: step.id, timer: setTimeout(advanceAfterCompletion, 360) };
+      completion = { id: step.id, timer: setTimeout(advanceAfterCompletion, 1350) };
     } else selected = done ? step.id : Ritual.nextAction(store, mode, Ritual.getActions(store, day, mode), step.id);
     render();
     if (completion) confirmAction();
-    else if (updated && !done) { revealAction(); focusAction(); }
+    else if (updated && !done) {
+      clearTimeout(grainTimer);
+      scene.dataset.instantGrain = step.id;
+      grainTimer = setTimeout(() => { delete scene.dataset.instantGrain; }, 1350);
+      revealAction();
+      if (wasFocused && complete.hidden) focusAction();
+    }
     if (updated && done) revealAction(-1);
-    announce(!updated ? "记录已在另一处更新" : done ? "已撤销完成" : step.done ?? `${step.label}已完成`);
+    announce(!updated ? "记录已在另一处更新" : done ? "已撤销完成" : `${step.label}已完成，已喂一粒谷物。`);
   });
 
   startBreath.addEventListener("click", () => {
@@ -759,20 +795,23 @@
     focusAction();
   });
 
+  const disclosures = [actionOptions, scene];
   document.addEventListener("pointerdown", event => {
-    if (actionOptions.open && !actionOptions.contains(event.target)) actionOptions.open = false;
-  });
-
-  actionOptions.addEventListener("keydown", event => {
-    if (event.key === "Escape" && actionOptions.open) {
-      actionOptions.open = false;
-      actionOptions.querySelector("summary").focus();
+    for (const panel of disclosures) {
+      if (panel.open && !panel.contains(event.target)) panel.open = false;
     }
   });
-
-  actionOptions.addEventListener("focusout", event => {
-    if (!actionOptions.contains(event.relatedTarget)) actionOptions.open = false;
-  });
+  for (const panel of disclosures) {
+    panel.addEventListener("keydown", event => {
+      if (event.key === "Escape" && panel.open) {
+        panel.open = false;
+        panel.querySelector("summary").focus();
+      }
+    });
+    panel.addEventListener("focusout", event => {
+      if (!panel.contains(event.relatedTarget)) panel.open = false;
+    });
+  }
 
   byId("routine-actions").addEventListener("click", event => {
     const button = event.target.closest("button[data-step]");
@@ -888,7 +927,7 @@
     }
     renderNote(true);
     byId("note-feedback").textContent = canPersist ? "已保存" : "当前页面已更新";
-    renderWeek();
+    renderRecentNotes();
   });
 
   breathDialog.addEventListener("close", () => clearInterval(breathTimer));

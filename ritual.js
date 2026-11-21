@@ -6,18 +6,18 @@ const Ritual = (() => {
     morning: [
       { id: "brush", title: "刷牙", label: "刷牙", core: true },
       { id: "stretch", title: "伸展一下", label: "伸展一下", prompt: "选一个舒服的动作。" },
-      { id: "read", title: "阅读", label: "阅读", prompt: "读一页，或读一段感兴趣的内容。" },
-      { id: "write", title: "写作表达", label: "写作表达", prompt: "写几句话，或练习说清楚一个想法。" },
-      { id: "water", title: "喝水", label: "喝水", prompt: "起身喝点水。" },
-      { id: "walk", title: "闲走", label: "闲走", prompt: "放下屏幕，随意走一会儿。" },
+      { id: "read", title: "阅读", label: "阅读", prompt: "读一页就好。" },
+      { id: "write", title: "写作表达", label: "写作表达", prompt: "说或写下一个想法。" },
+      { id: "water", title: "喝水", label: "喝水" },
+      { id: "walk", title: "闲走", label: "闲走", prompt: "离开屏幕走一会儿。" },
       { id: "supplement", title: "补品", label: "补品", prompt: "按自己原有的安排记录。" }
     ],
     evening: [
-      { id: "desk", title: "整理桌面", label: "整理桌面", prompt: "关电脑后，收走三样东西。一件也算。", done: "给明早腾出了一块地方。", core: true },
+      { id: "desk", title: "整理桌面", label: "整理桌面", prompt: "收走一样也算。", done: "给明早腾出了一块地方。", core: true },
       { id: "brush", title: "睡前刷牙", label: "睡前刷牙", core: true },
       { id: "breath", title: "呼吸或冥想", label: "呼吸或冥想" },
-      { id: "read", title: "阅读", label: "阅读", prompt: "读一页，或读一段感兴趣的内容。" },
-      { id: "write", title: "写作表达", label: "写作表达", prompt: "写几句话，或练习说清楚一个想法。" },
+      { id: "read", title: "阅读", label: "阅读", prompt: "读一页就好。" },
+      { id: "write", title: "写作表达", label: "写作表达", prompt: "说或写下一个想法。" },
       { id: "water", title: "喝水", label: "喝水" },
       { id: "walk", title: "闲走", label: "闲走" },
       { id: "supplement", title: "补品", label: "补品", prompt: "按自己原有的安排记录。" }
@@ -88,13 +88,40 @@ const Ritual = (() => {
     return [...steps.slice(index + 1), ...steps.slice(0, index + 1)].find(step => !actions[step.id])?.id;
   }
 
+  function companionGrowth(store, throughDay) {
+    let days = 0;
+    for (const [day, record] of Object.entries(store.days)) {
+      if (day > throughDay) continue;
+      const practiced = ["morning", "evening"].some(period =>
+        Object.entries(record[period] ?? {}).some(([id, entry]) => id !== "supplement" && entry.status === "done")
+      );
+      if (practiced) days++;
+    }
+    if (days >= 30) return { days, stage: "adult", label: "成鸟" };
+    if (days >= 7) return { days, stage: "juvenile", label: "幼鸟" };
+    return { days, stage: "chick", label: "雏鸟" };
+  }
+
+  function habitDoneOn(store, mode, id, day) {
+    if (id.startsWith("supplement-")) return supplementChecks(store, day)[id.slice(11)] === mode;
+    return getActions(store, day, mode)[id]?.status === "done";
+  }
+
+  function recentHabitDays(store, mode, id, throughDay) {
+    let days = 0;
+    for (let offset = 0; offset < 28; offset++) {
+      if (habitDoneOn(store, mode, id, offsetDay(throughDay, -offset))) days++;
+    }
+    return days;
+  }
+
   function heatmap(store, mode, id, end, period) {
     const [year, month] = end.split("-").map(Number);
     const start = period === "year" ? `${year}-01-01` : period === "month" ? `${year}-${String(month).padStart(2, "0")}-01` : offsetDay(end, -6);
     const last = period === "year" ? `${year}-12-31` : period === "month" ? offsetDay(dateKey(new Date(year, month, 1, 12)), -1) : end;
     const cells = [];
     for (let key = start; key <= last; key = offsetDay(key, 1)) {
-      const recorded = id.startsWith("supplement-") ? supplementChecks(store, key)[id.slice(11)] === mode : getActions(store, key, mode)[id]?.status === "done";
+      const recorded = habitDoneOn(store, mode, id, key);
       cells.push({ day: key, future: key > end, done: key <= end && recorded });
     }
     return cells;
@@ -192,5 +219,5 @@ const Ritual = (() => {
     actions[field] = entry;
   }
 
-  return { routines, getSteps, roundProgress, nextAction, heatmap, offsetDay, activeDay, defaultMode, getActions, currentAction, saveAction, saveNote, supplementChecks, setSupplementCheck, weekEnding, readEntry };
+  return { routines, getSteps, roundProgress, nextAction, heatmap, recentHabitDays, companionGrowth, offsetDay, activeDay, defaultMode, getActions, currentAction, saveAction, saveNote, supplementChecks, setSupplementCheck, weekEnding, readEntry };
 })();

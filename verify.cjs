@@ -47,4 +47,27 @@ assert.equal(R.roundProgress(active, actions).latest.id, custom.id);
 delete actions[custom.id];
 assert.equal(R.roundProgress(active, actions).latest.id, 'read');
 assert.equal(R.currentAction('morning', {}, undefined, { habits: { morning: [] } }).title, '添加一个小习惯');
-console.log('PASS: progression, skip, finish, undo, custom persistence, order, pause, historical counts, leap dates, future dates, midnight rollover, supplements, invalid settings');
+const journal = { days: {}, supplements: {}, habits: { morning: [{ ...custom, paused: true }] } };
+const mark = (offset, period, id, status) => R.saveAction(journal, R.offsetDay(day, offset), period, id, status);
+mark(0, 'morning', 'brush', 'skipped');
+mark(-1, 'evening', 'supplement', 'done');
+R.setSupplementCheck(journal, day, '0123456789abcdef01234567', 'morning');
+R.saveNote(journal, day, 'snack', 'no');
+mark(1, 'evening', 'walk', 'done');
+assert.equal(R.companionGrowth(journal, day).days, 0);
+for (let ago = 0; ago < 30; ago++) {
+  mark(-ago, 'morning', custom.id, 'done');
+  mark(-ago, 'evening', 'walk', 'done');
+  const growth = R.companionGrowth(journal, day);
+  assert.equal(growth.days, ago + 1);
+  assert.equal(growth.stage, ago < 6 ? 'chick' : ago < 29 ? 'juvenile' : 'adult');
+}
+assert.equal(R.recentHabitDays(journal, 'morning', custom.id, day), 28);
+assert.equal(R.recentHabitDays(journal, 'evening', custom.id, day), 0);
+assert.equal(R.recentHabitDays(journal, 'morning', 'supplement-0123456789abcdef01234567', day), 1);
+mark(0, 'morning', custom.id, undefined);
+assert.equal(R.companionGrowth(journal, day).days, 30);
+mark(0, 'evening', 'walk', undefined);
+assert.equal(R.companionGrowth(journal, day).stage, 'juvenile');
+assert.equal(R.recentHabitDays(journal, 'morning', custom.id, day), 27);
+console.log('PASS: progression, skip, finish, undo, custom persistence, order, pause, historical counts, leap dates, midnight rollover, supplements, growth milestones and 28-day habit counts');

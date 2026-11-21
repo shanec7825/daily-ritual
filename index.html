@@ -6,43 +6,26 @@
   <meta name="description" content="早晨和晚上的个人习惯打卡器。">
   <title>早晚打卡</title>
   <link rel="stylesheet" href="vendor/daisyui.css">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=76ccb05588">
   <script src="vendor/motion.js" defer></script>
-  <script src="ritual.js" defer></script>
-  <script src="app.js" defer></script>
+  <script src="ritual.js?v=128668773e" defer></script>
+  <script src="quotations.js" defer></script>
+  <script src="app.js?v=097acc64b3" defer></script>
 </head>
 <body>
   <svg class="icon-library" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <!-- Phosphor Icons 2.1.1, MIT. See vendor/phosphor-icons.LICENSE.txt. -->
-      <symbol id="icon-desk" viewBox="0 0 256 256">
-        <path d="M192.8,165.12,43.93,105.57A110.88,110.88,0,0,1,61.47,82.38a8,8,0,0,1,8.67-1.81L95.52,90.85a16,16,0,0,0,20.82-9l21-53.1c4.15-10,15.47-15.33,25.63-11.53a20,20,0,0,1,11.51,26.39L153.13,96.71a16,16,0,0,0,8.93,20.75L187,127.3a8,8,0,0,1,5,7.43V152A104.58,104.58,0,0,0,192.8,165.12Z" opacity="0.2"/>
-        <path d="M235.5,216.81c-22.56-11-35.5-34.58-35.5-64.8V134.73a15.94,15.94,0,0,0-10.09-14.87L165,110a8,8,0,0,1-4.48-10.34l21.32-53a28,28,0,0,0-16.1-37,28.14,28.14,0,0,0-35.82,16,.61.61,0,0,0,0,.12L108.9,79a8,8,0,0,1-10.37,4.49L73.11,73.14A15.89,15.89,0,0,0,55.74,76.8C34.68,98.45,24,123.75,24,152a111.45,111.45,0,0,0,31.18,77.53A8,8,0,0,0,61,232H232a8,8,0,0,0,3.5-15.19ZM67.14,88l25.41,10.3a24,24,0,0,0,31.23-13.45l21-53c2.56-6.11,9.47-9.27,15.43-7a12,12,0,0,1,6.88,15.92L145.69,93.76a24,24,0,0,0,13.43,31.14L184,134.73V152c0,.33,0,.66,0,1L55.77,101.71A108.84,108.84,0,0,1,67.14,88Zm48,128a87.53,87.53,0,0,1-24.34-42,8,8,0,0,0-15.49,4,105.16,105.16,0,0,0,18.36,38H64.44A95.54,95.54,0,0,1,40,152a85.9,85.9,0,0,1,7.73-36.29l137.8,55.12c3,18,10.56,33.48,21.89,45.16Z"/>
-      </symbol>
+      <symbol id="icon-desk" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M3 14h18M5 14v6m14-6v6M7 11V5h10v6zm3 0v3m4-3v3"/></g></symbol>
       <symbol id="icon-brush" viewBox="0 0 256 256">
         <path d="M216,79.76c.07,71.42-23.48,128.23-44,142.78a8,8,0,0,1-12.52-6C158,196.31,152,160,128,160s-30,36.31-31.51,56.53a8,8,0,0,1-12.52,6C63.48,208,39.93,151.18,40,79.76A47.94,47.94,0,0,1,88,32h80A47.94,47.94,0,0,1,216,79.76Z" opacity="0.2"/>
         <path d="M171,71.42,149.54,80,171,88.57A8,8,0,1,1,165,103.42L128,88.61,91,103.42A8,8,0,1,1,85,88.57L106.46,80,85,71.42A8,8,0,1,1,91,56.57l37,14.81,37-14.81A8,8,0,1,1,171,71.42Zm53,8.33c0,42.72-8,75.4-14.7,95.28-8.72,25.8-20.62,45.49-32.64,54a15.69,15.69,0,0,1-15.95,1.41,16.09,16.09,0,0,1-9.18-13.36C150.68,205.58,146.48,168,128,168s-22.68,37.59-23.53,49.11a16.09,16.09,0,0,1-16,14.9,15.67,15.67,0,0,1-9.13-2.95c-12-8.53-23.92-28.22-32.64-54C40,155.15,32,122.47,32,79.75A56,56,0,0,1,88,24h80A56,56,0,0,1,224,79.75Zm-16,0A40,40,0,0,0,168,40H88A40,40,0,0,0,48,79.76c0,40.55,7.51,71.4,13.85,90.14,11.05,32.66,23,43.37,26.61,46C91.57,174.67,105.59,152,128,152s36.45,22.71,39.49,63.94h0c3.6-2.59,15.57-13.26,26.66-46C200.49,151.16,208,120.31,208,79.76Z"/>
       </symbol>
-      <symbol id="icon-stretch" viewBox="0 0 256 256">
-        <path d="M104,40a24,24,0,1,1,24,24A24,24,0,0,1,104,40ZM212,80H44c-12.87,0-16.71,17.5-5,22.9L96,128,73.13,214.93a12,12,0,0,0,21.75,10.14L128,168l33.12,57.07a12,12,0,0,0,21.75-10.14L160,128l57-25.1C228.69,97.5,224.85,80,212,80Z" opacity="0.2"/>
-        <path d="M160,40a32,32,0,1,0-32,32A32,32,0,0,0,160,40ZM128,56a16,16,0,1,1,16-16A16,16,0,0,1,128,56ZM231.5,87.71A19.62,19.62,0,0,0,212,72H44a20,20,0,0,0-8.38,38.16l.13.06,50.75,22.35-21,79.72A20,20,0,0,0,102,228.82l26-44.88,26,44.88a20,20,0,0,0,36.4-16.53l-21-79.72,50.75-22.35.13-.06A19.63,19.63,0,0,0,231.5,87.71Zm-17.8,7.9-56.93,25.07a8,8,0,0,0-4.51,9.36L175.13,217a7,7,0,0,0,.49,1.35,4,4,0,1,1-7.25,3.38c-.11-.22-.22-.43-.34-.63L134.92,164a8,8,0,0,0-13.84,0L88,221.06c-.12.2-.23.41-.34.63a4,4,0,1,1-7.25-3.38,7,7,0,0,0,.49-1.35L103.74,130a8,8,0,0,0-4.51-9.36L42.3,95.61A4,4,0,0,1,44,88H212a4,4,0,0,1,1.73,7.61Z"/>
-      </symbol>
-      <symbol id="icon-read" viewBox="0 0 256 256">
-        <path d="M232,56V200H160a32,32,0,0,0-32,32,32,32,0,0,0-32-32H24V56H96a32,32,0,0,1,32,32,32,32,0,0,1,32-32Z" opacity="0.2"/>
-        <path d="M232,48H160a40,40,0,0,0-32,16A40,40,0,0,0,96,48H24a8,8,0,0,0-8,8V200a8,8,0,0,0,8,8H96a24,24,0,0,1,24,24,8,8,0,0,0,16,0,24,24,0,0,1,24-24h72a8,8,0,0,0,8-8V56A8,8,0,0,0,232,48ZM96,192H32V64H96a24,24,0,0,1,24,24V200A39.81,39.81,0,0,0,96,192Zm128,0H160a39.81,39.81,0,0,0-24,8V88a24,24,0,0,1,24-24h64Z"/>
-      </symbol>
-      <symbol id="icon-write" viewBox="0 0 256 256">
-        <path d="M221.66,90.34,192,120,136,64l29.66-29.66a8,8,0,0,1,11.31,0L221.66,79A8,8,0,0,1,221.66,90.34Z" opacity="0.2"/>
-        <path d="M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z"/>
-      </symbol>
-      <symbol id="icon-breath" viewBox="0 0 256 256">
-        <path d="M120,96a24,24,0,1,1,24-24A24,24,0,0,1,120,96Zm88-16a24,24,0,1,0,24,24A24,24,0,0,0,208,80Zm-56,80a24,24,0,1,0,24,24A24,24,0,0,0,152,160Z" opacity="0.2"/>
-        <path d="M184,184a32,32,0,0,1-32,32c-13.7,0-26.95-8.93-31.5-21.22a8,8,0,0,1,15-5.56C137.74,195.27,145,200,152,200a16,16,0,0,0,0-32H40a8,8,0,0,1,0-16H152A32,32,0,0,1,184,184Zm-64-80a32,32,0,0,0,0-64c-13.7,0-26.95,8.93-31.5,21.22a8,8,0,0,0,15,5.56C105.74,60.73,113,56,120,56a16,16,0,0,1,0,32H24a8,8,0,0,0,0,16Zm88-32c-13.7,0-26.95,8.93-31.5,21.22a8,8,0,0,0,15,5.56C193.74,92.73,201,88,208,88a16,16,0,0,1,0,32H32a8,8,0,0,0,0,16H208a32,32,0,0,0,0-64Z"/>
-      </symbol>
-      <symbol id="icon-supplement" viewBox="0 0 256 256">
-        <path d="M160,160l-50.75,50.75a45.26,45.26,0,0,1-64,0h0a45.26,45.26,0,0,1,0-64L96,96Z" opacity="0.2"/>
-        <path d="M216.43,39.6a53.27,53.27,0,0,0-75.33,0L39.6,141.09a53.26,53.26,0,0,0,75.32,75.31L216.43,114.91A53.32,53.32,0,0,0,216.43,39.6ZM103.61,205.09h0a37.26,37.26,0,0,1-52.7-52.69L96,107.31,148.7,160ZM205.11,103.6,160,148.69,107.32,96l45.1-45.09a37.26,37.26,0,0,1,52.69,52.69ZM189.68,82.34a8,8,0,0,1,0,11.32l-24,24a8,8,0,1,1-11.31-11.32l24-24A8,8,0,0,1,189.68,82.34Z"/>
-      </symbol>
+      <symbol id="icon-stretch" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2"/><path d="m4 7 8 4 8-4m-8 4v4m0 0-5 6m5-6 5 6"/></g></symbol>
+      <symbol id="icon-read" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6c-2-2-6-2.5-9-2v14c3-.5 7 0 9 2 2-2 6-2.5 9-2V4c-3-.5-7 0-9 2Zm0 0v14"/></g></symbol>
+      <symbol id="icon-write" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h7M5 4v16h14v-7m-9 2 1-4 7-7a1.8 1.8 0 0 1 3 3l-7 7-4 1Zm6-9 3 3"/></g></symbol>
+      <symbol id="icon-breath" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10a3 3 0 1 0-3-3m-6 7h14a3 3 0 1 0-2-5m-9 9h6a2.5 2.5 0 1 1-2 4"/></g></symbol>
+      <symbol id="icon-supplement" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="m9 19 10-10a4.3 4.3 0 0 0-6-6L3 13a4.3 4.3 0 0 0 6 6Zm-1-11 7 7"/></g></symbol>
       <symbol id="icon-sun" viewBox="0 0 256 256">
         <path d="M192,144a64.33,64.33,0,0,1-2,16H66a64,64,0,1,1,126-16Z" opacity="0.2"/>
         <path d="M240,152H199.55a73.54,73.54,0,0,0,.45-8,72,72,0,0,0-144,0,73.54,73.54,0,0,0,.45,8H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16ZM72,144a56,56,0,1,1,111.41,8H72.59A56.13,56.13,0,0,1,72,144Zm144,56a8,8,0,0,1-8,8H48a8,8,0,0,1,0-16H208A8,8,0,0,1,216,200ZM72.84,43.58a8,8,0,0,1,14.32-7.16l8,16a8,8,0,0,1-14.32,7.16Zm-56,48.84a8,8,0,0,1,10.74-3.57l16,8a8,8,0,0,1-7.16,14.31l-16-8A8,8,0,0,1,16.84,92.42Zm192,15.16a8,8,0,0,1,3.58-10.73l16-8a8,8,0,1,1,7.16,14.31l-16,8a8,8,0,0,1-10.74-3.58Zm-48-55.16,8-16a8,8,0,0,1,14.32,7.16l-8,16a8,8,0,1,1-14.32-7.16Z"/>
@@ -51,19 +34,77 @@
         <path d="M210.69,158.18A88,88,0,1,1,97.82,45.31,96.08,96.08,0,0,0,192,160,96.78,96.78,0,0,0,210.69,158.18Z" opacity="0.2"/>
         <path d="M240,96a8,8,0,0,1-8,8H216v16a8,8,0,0,1-16,0V104H184a8,8,0,0,1,0-16h16V72a8,8,0,0,1,16,0V88h16A8,8,0,0,1,240,96ZM144,56h8v8a8,8,0,0,0,16,0V56h8a8,8,0,0,0,0-16h-8V32a8,8,0,0,0-16,0v8h-8a8,8,0,0,0,0,16Zm72.77,97a8,8,0,0,1,1.43,8A96,96,0,1,1,95.07,37.8a8,8,0,0,1,10.6,9.06A88.07,88.07,0,0,0,209.14,150.33,8,8,0,0,1,216.77,153Zm-19.39,14.88c-1.79.09-3.59.14-5.38.14A104.11,104.11,0,0,1,88,64c0-1.79,0-3.59.14-5.38A80,80,0,1,0,197.38,167.86Z"/>
       </symbol>
-      <symbol id="icon-check" viewBox="0 0 256 256">
-        <path d="M237.66,85.26l-128.4,128.4a8,8,0,0,1-11.32,0l-71.6-72a8,8,0,0,1,0-11.31l24-24a8,8,0,0,1,11.32,0L104,147.43l98.34-97.09a8,8,0,0,1,11.32,0l24,23.6A8,8,0,0,1,237.66,85.26Z" opacity="0.2"/>
-        <path d="M243.28,68.24l-24-23.56a16,16,0,0,0-22.59,0L104,136.23l-36.69-35.6a16,16,0,0,0-22.58.05l-24,24a16,16,0,0,0,0,22.61l71.62,72a16,16,0,0,0,22.63,0L243.33,90.91A16,16,0,0,0,243.28,68.24ZM103.62,208,32,136l24-24a.6.6,0,0,1,.08.08l42.35,41.09a8,8,0,0,0,11.19,0L208.06,56,232,79.6Z"/>
-      </symbol>
-      <symbol id="icon-dots" viewBox="0 0 256 256">
-        <path d="M240,96v64a16,16,0,0,1-16,16H32a16,16,0,0,1-16-16V96A16,16,0,0,1,32,80H224A16,16,0,0,1,240,96Z" opacity="0.2"/>
-        <path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Zm56-12a12,12,0,1,0,12,12A12,12,0,0,0,196,116ZM60,116a12,12,0,1,0,12,12A12,12,0,0,0,60,116Z"/>
-      </symbol>
-      <symbol id="icon-water" viewBox="0 0 256 256"><path d="M128 24S56 110 56 156a72 72 0 0 0 144 0c0-46-72-132-72-132Z" fill="currentColor" opacity=".2"/><path d="M128 24S56 110 56 156a72 72 0 0 0 144 0c0-46-72-132-72-132Z" fill="none" stroke="currentColor" stroke-width="16" stroke-linejoin="round"/></symbol>
-      <symbol id="icon-walk" viewBox="0 0 256 256"><circle cx="148" cy="36" r="20" fill="none" stroke="currentColor" stroke-width="16"/><path d="m64 124 40-40 40 8 28 40 36 12M140 92l-20 68-48 64m48-64 48 24 12 40" fill="none" stroke="currentColor" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24"><path d="m4.5 12.5 5 5 10-11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+      <symbol id="icon-dots" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.65"/><circle cx="12" cy="12" r="1.65"/><circle cx="19" cy="12" r="1.65"/></symbol>
+      <symbol id="icon-water" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="m5 4 2 16h10l2-16H5Zm1 7c4-2 7 2 12 0"/></g></symbol>
+      <symbol id="icon-walk" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><circle cx="14.5" cy="4" r="1.7"/><path d="m5 13 3-4 5-1 3 4 4 1m-7-5-2 7-5 6m5-6 5 2 1 4"/></g></symbol>
       <symbol id="icon-brand" viewBox="0 0 256 256">
         <path d="M184,128a56,56,0,1,1-56-56A56,56,0,0,1,184,128Z" opacity="0.2"/>
         <path d="M120,40V32a8,8,0,0,1,16,0v8a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-8-8A8,8,0,0,0,50.34,61.66Zm0,116.68-8,8a8,8,0,0,0,11.32,11.32l8-8a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l8-8a8,8,0,0,0-11.32-11.32l-8,8A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l8,8a8,8,0,0,0,11.32-11.32ZM40,120H32a8,8,0,0,0,0,16h8a8,8,0,0,0,0-16Zm88,88a8,8,0,0,0-8,8v8a8,8,0,0,0,16,0v-8A8,8,0,0,0,128,208Zm96-88h-8a8,8,0,0,0,0,16h8a8,8,0,0,0,0-16Z"/>
+      </symbol>
+      <symbol id="icon-feather" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="M5 20 17 8M8 16C5 10 11 3 20 3c1 8-4 15-12 13Z"/><path d="m11 13 4 .2"/></g></symbol>
+      <symbol id="icon-grain" viewBox="0 0 24 24"><g fill="currentColor"><ellipse cx="7" cy="15.5" rx="3.1" ry="4.8" transform="rotate(-38 7 15.5)"/><ellipse cx="16" cy="15" rx="2.9" ry="4.5" transform="rotate(47 16 15)"/><ellipse cx="13" cy="6.8" rx="2.6" ry="3.9" transform="rotate(63 13 6.8)"/></g></symbol>
+      <symbol id="icon-checklist" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.65" stroke-linecap="round" stroke-linejoin="round"><path d="m3 6 1.5 1.5 3-3M11 6h10M3 12l1.5 1.5 3-3M11 12h10M3 18l1.5 1.5 3-3M11 18h10"/></g></symbol>
+      <symbol id="icon-undo" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.85" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5-5 5 5 5M5 10h9a5 5 0 0 1 0 10h-4"/></g></symbol>
+      <symbol id="drawing-brush" viewBox="0 0 120 72">
+        <path class="sketch-wash" d="M34 33q16 7 37 0l-5 24q-13 7-27 0z"/>
+        <path d="m44 34-14-21q-1-3 2-4l4 2 15 23m-18-18 7-4m-5 7 7-4m-5 7 7-4"/>
+        <path d="M34 33c0-4 6-5 10-5M54 28c9 0 17 2 17 5s-9 6-19 6-18-3-18-6M34 34l5 23c4 5 22 5 27 0l5-23"/>
+        <path class="sketch-fine" d="m40 40 3 13m2-12 2 13m18-14-2 10M24 60q20 3 49 0m4-1 11-1"/>
+        <path class="sketch-accent" d="M84 21s-4 5-4 8a4 4 0 0 0 8 0c0-3-4-8-4-8Z"/>
+      </symbol>
+      <symbol id="drawing-stretch" viewBox="0 0 120 72">
+        <path class="sketch-wash" d="M17 58q38-6 82-2l-7 7H15z"/>
+        <circle cx="57" cy="23" r="5"/>
+        <path d="M76 12c-13-3-22 2-29 11-5 8-8 16-7 23l-11 9-8 1m52-40c-11 0-17 5-20 12m-1 2c0 7 4 10 6 15l15 8 7 1m-39-9 10-10m-9 11 8 1 12 9m-9-24c9 6 15 8 24 7"/>
+        <path class="sketch-fine" d="m19 59 72-2 8-4m-80 9 73-2 7-4"/>
+        <path class="sketch-accent" d="M34 23c4-8 10-14 18-16m-23 13 4-6"/>
+      </symbol>
+      <symbol id="drawing-read" viewBox="0 0 120 72">
+        <path class="sketch-wash" d="M18 24q21-8 39 6 15-16 37-16l-3 33q-18 0-33 12-18-11-41-7z"/>
+        <path d="M19 24c15-4 28-2 38 6 11-10 24-15 38-15l-3 31c-13 0-25 4-34 13-11-8-25-11-41-8l2-27Zm38 6 1 29M15 29l-3 25c18-2 32 1 45 9 12-9 24-13 39-13l3-28"/>
+        <path class="sketch-fine" d="M25 31q13-2 23 4m-24 3q12-2 22 3m20-8q8-6 19-8m-20 15q7-5 15-7"/>
+        <path class="sketch-accent" d="m77 19-1 14 4-4 3 1 1-13"/>
+      </symbol>
+      <symbol id="drawing-write" viewBox="0 0 120 72">
+        <path class="sketch-wash" d="m21 40 48-11 21 21-49 14z"/>
+        <path d="m21 39 47-10 22 21-49 12-20-21zm0 3 1 4 18 19 51-12v-3M49 47l8-2 31-32a3 3 0 0 0-5-4L51 40l-2 7Zm2-7 6 5m21-30 5 5"/>
+        <path class="sketch-fine" d="m30 40 12-3m-8 10 7-2m20 8 19-5M27 61l7 4"/>
+        <path class="sketch-accent" d="M43 51c-6-2-11 3-6 5 3 0 5-5 8-4l4 1 5-2"/>
+      </symbol>
+      <symbol id="drawing-water" viewBox="0 0 120 72">
+        <path class="sketch-wash" d="M28 33q13-5 29-1l-2 23q-12 7-23 1zm39 13q10-3 22-1l-2 13q-9 4-17 0z"/>
+        <path d="M26 25c1-3 6-6 10-8l-2-5c7-2 16-2 22 0l1 8c3 4 4 7 3 13l-3 23c-7 5-18 6-26 1l-5-32Zm31-7c15-5 16 13 4 17M27 26l6-2m0-13 7 4"/>
+        <path d="M66 38c3-4 19-4 24 0l-3 20c-5 3-12 3-17 0l-4-20Zm0 0q12 4 24 0"/>
+        <path class="sketch-accent" d="M30 34q7-4 13-2t13 0m14 14q5-2 9-1t8-1"/>
+        <path class="sketch-fine" d="m35 39 2 13m37-5 1 6M22 61l14 1m47 0 13-1"/>
+      </symbol>
+      <symbol id="drawing-walk" viewBox="0 0 120 72">
+        <path class="sketch-wash" d="M17 50q25-5 37-17t28-6q-12 7-16 19-25 2-49 11z"/>
+        <path d="M13 51c17 0 25-3 32-8m-29-1c11 0 23-6 34-15s23-12 39-8M52 37c12-10 22-12 31-10 8 2-9 5-11 8-2 4 12 4 10 8-2 5-16 10-25 21"/>
+        <path class="sketch-fine" d="M43 62c8-8 17-12 24-16m14-11c5 4 16 4 24 2m-5 6 5 1m-80 9 8-1"/>
+        <path class="sketch-accent" d="M29 37V19m0 10c-6-2-8-6-7-11 5 1 8 5 7 11zm1-5c5-1 8-6 8-12-6 2-8 6-8 12Z"/>
+      </symbol>
+      <symbol id="drawing-desk" viewBox="0 0 120 72">
+        <path class="sketch-wash" d="m42 21 14-13 13 5-18 16zM62 43l26-5 8 6-25 6z"/>
+        <path d="M15 51h91m-84 0-2 13m77-13 2 13M24 46h24c-2-3-5-4-9-4h-6c-4 0-7 1-9 4Zm11-4-6-15 15-14m-10 28-8-15 16-15"/>
+        <path d="M40 15q6-11 16-6l9 7-17 12-7-9m8 8 15-11M61 42l25-5 10 6-26 6-9-7Zm0 2v4l8 3m3-4 24-5"/>
+        <path class="sketch-accent" d="m55 29 3 5m4-9 5 4"/>
+        <path class="sketch-fine" d="m26 57 12 1m36-14 13-3"/>
+      </symbol>
+      <symbol id="drawing-breath" viewBox="0 0 120 72">
+        <path class="sketch-wash" d="M39 54c-1-4 7-9 19-9 12 0 22 3 23 8 0 5-11 8-23 8s-19-3-19-7Z"/>
+        <path d="M41 44c-8 0-13 4-12 9 1 5 12 9 28 9 16 0 30-3 32-8 2-5-5-9-15-10"/>
+        <path d="M40 42c0-5 10-9 19-9 10 0 19 3 19 7 0 5-10 9-20 9s-18-3-18-7Z"/>
+        <path d="M50 30c1-4 8-7 14-6 5 0 8 2 8 4 0 4-8 7-13 7-6 0-9-2-9-5Z"/>
+        <path class="sketch-accent" d="M31 24c12-1 13-12 27-13 10-1 16 4 26-1m-46 8c6-7 12-11 21-12"/>
+        <path class="sketch-fine" d="M20 62q10 2 17 2m34-8 8-2"/>
+      </symbol>
+      <symbol id="drawing-sprig" viewBox="0 0 120 72">
+        <path class="sketch-wash" d="M56 39q-21-1-25-17 17 1 25 17zm5-7q1-18 21-23-2 16-21 23z"/>
+        <path d="M39 61c12-14 18-25 27-40m-11 20c-14 0-23-10-25-20 13 0 23 8 25 20Zm6-8c0-13 10-22 22-25-2 11-9 21-22 25Zm-15 20c11 1 22-5 27-13-11-2-21 4-27 13Z"/>
+        <path class="sketch-fine" d="m38 27 11 9m19-12 8-9M23 62q15 2 28 0"/>
+        <path class="sketch-accent" d="M77 43q7-5 12-2-3 6-12 6"/>
       </symbol>
     </defs>
   </svg>
@@ -90,32 +131,31 @@
     <div id="daily-view">
     <h1 class="sr-only">早晚打卡</h1>
     <div class="dashboard">
-      <div class="primary-lane">
-        <section id="action-card" class="card card-border action-card" aria-labelledby="action-title">
-          <div class="hero-art" id="ritual-scene" aria-hidden="true">
-            <div class="scene-print">
-              <div class="morning-landscape">
-                <i class="rising-sun"></i>
-                <i class="distant-hill"></i>
-                <i class="near-hill"></i>
-              </div>
-              <div class="evening-window">
-                <i class="window-stars"></i>
-                <i class="lamplight"></i>
-                <i class="window-frame"></i>
-              </div>
+      <section id="action-card" class="card card-border action-card" aria-labelledby="action-title">
+        <div class="action-stage">
+          <svg class="action-sketch" id="action-sketch" viewBox="0 0 120 72" aria-hidden="true" focusable="false"><use href="#drawing-brush"></use></svg>
+          <details class="companion" id="ritual-scene">
+            <summary id="bird-metrics" title="小鸟的成长与喂食" aria-label="小鸟的成长与喂食">
+              <span class="scene-print" aria-hidden="true">
+                <span class="morning-landscape"><i class="rising-sun"></i><i class="distant-hill"></i><i class="near-hill"></i></span>
+                <span class="evening-window"><i class="window-stars"></i><i class="lamplight"></i><i class="window-frame"></i></span>
+                <span class="window-sill"></span><span class="sparrow"></span><i class="grain"></i>
+              </span>
+              <span class="feed-reward" aria-hidden="true"><svg class="line-icon"><use href="#icon-grain"></use></svg>+1</span>
+              <span class="bird-stats" aria-hidden="true">
+                <span><svg class="line-icon"><use href="#icon-feather"></use></svg><span id="bird-days"></span>天</span>
+                <span><svg class="line-icon"><use href="#icon-grain"></use></svg><span id="meal-value"></span></span>
+              </span>
+            </summary>
+            <div class="bird-detail">
+              <p id="bird-growth"></p><p id="meal-count"></p>
+              <p id="completion-feedback" hidden></p>
+              <p class="growth-threshold">累计 7 天长成幼鸟，30 天长成成鸟。</p>
             </div>
-          </div>
-          <div class="card-body hero-content">
-            <div class="action-copy" id="action-copy">
-              <h2 id="action-title" tabindex="-1"></h2>
-              <p id="action-description"></p>
-              <button type="button" class="btn btn-soft btn-sm breath-link" id="start-breath" hidden>呼吸引导</button>
-            </div>
+          </details>
+          <div class="action-primary">
             <div class="action-controls">
-              <button type="button" class="btn btn-primary btn-circle check-button" id="complete-action" aria-pressed="false">
-                <svg class="line-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
-              </button>
+              <h2 id="action-title" tabindex="-1"><button type="button" class="check-button" id="complete-action" aria-pressed="false"><span id="action-name"></span><span class="check-disc" aria-hidden="true"><svg class="line-icon"><use id="complete-glyph" href="#icon-check"></use></svg></span></button><span id="round-title" hidden></span></h2>
               <details id="action-options" class="action-options">
                 <summary class="btn btn-ghost btn-circle" aria-label="本项选项"><svg class="line-icon" aria-hidden="true"><use href="#icon-dots"></use></svg></summary>
                 <div class="action-tools">
@@ -124,92 +164,91 @@
                 </div>
               </details>
             </div>
-            <p class="completion-feedback" id="completion-feedback" hidden></p>
+            <p id="action-description" hidden></p>
+            <button type="button" class="btn btn-soft btn-sm breath-link" id="start-breath" hidden>呼吸引导</button>
           </div>
-        </section>
-        <details id="night-note" class="collapse collapse-arrow note-panel" hidden>
-          <summary class="collapse-title"><span>昨晚小记</span><time class="note-date" id="note-date"></time></summary>
-          <form id="note-form" class="collapse-content note-form">
-            <div class="time-field">
-              <label for="lights-out">大概几点关灯</label>
-              <input class="input" id="lights-out" name="lightsOut" type="time">
-            </div>
-            <fieldset class="snack-field">
-              <legend>吃夜宵了吗</legend>
-              <div class="snack-options">
-                <label><input name="snack" type="radio" value="yes"> 有</label>
-                <label><input name="snack" type="radio" value="no"> 没有</label>
-                <label><input name="snack" type="radio" value="" checked> 未记录</label>
-              </div>
-            </fieldset>
-            <div class="note-footer">
-              <button class="btn btn-soft" type="submit">保存小记</button>
-              <span id="note-feedback" role="status"></span>
-            </div>
-          </form>
-        </details>
-      </div>
-      <section class="card card-border routine-panel" aria-labelledby="routine-list-heading">
-        <div class="routine-heading">
-          <h2 id="routine-list-heading">习惯</h2>
-          <span class="routine-count"><progress id="routine-meter" aria-hidden="true" max="1" value="0"></progress><span id="routine-progress"></span><span class="sr-only">已完成</span></span>
-          <button type="button" class="btn btn-ghost" id="manage-habits" aria-label="管理习惯" title="添加 / 排序">管理</button>
         </div>
-        <ul id="routine-actions" class="routine-actions"></ul>
-        <details id="supplement-panel" class="collapse collapse-arrow supplement-panel">
-          <summary class="collapse-title">
-            <span class="habit-icon"><svg class="line-icon" aria-hidden="true"><use href="#icon-supplement"></use></svg></span>
-            <span>补品</span><span id="supplement-count" class="badge badge-soft badge-primary supplement-count"></span>
-          </summary>
-          <div class="collapse-content supplement-content">
-            <p id="supplement-message" hidden></p>
-            <ul id="supplement-items" class="supplement-items"></ul>
-            <button id="manage-supplements" class="btn btn-soft" type="button">管理补品</button>
-          </div>
-        </details>
+        <blockquote class="habit-quote" id="habit-quote"></blockquote>
       </section>
-    </div>
-    <section class="card card-border week" aria-labelledby="week-title">
-      <div class="week-heading">
-        <h2 id="week-title">最近七天</h2>
-        <p id="week-summary"></p>
+      <div class="routine-strip">
+        <details class="routine-panel" id="routine-list">
+          <summary class="routine-heading" title="习惯清单">
+            <svg class="line-icon" aria-hidden="true"><use href="#icon-checklist"></use></svg>
+            <span class="sr-only">习惯清单</span>
+            <span class="routine-count"><progress id="routine-meter" aria-hidden="true" max="1" value="0"></progress><span id="routine-progress"></span><span class="sr-only">已完成</span></span>
+          </summary>
+          <ul id="routine-actions" class="routine-actions"></ul>
+        </details>
+        <button type="button" class="btn btn-ghost" id="manage-habits" aria-label="管理习惯" title="添加 / 排序">管理</button>
       </div>
-      <ul id="week-days" class="week-days"></ul>
-      <div class="week-legend"><span><i class="morning-dot" aria-hidden="true"></i>早晨</span><span><i class="evening-dot" aria-hidden="true"></i>晚上</span></div>
-      <details id="week-notes" class="collapse collapse-arrow week-notes" hidden>
-        <summary class="collapse-title">查看小记</summary>
-        <ul class="collapse-content" id="week-note-list"></ul>
+      <details id="supplement-panel" class="collapse collapse-arrow supplement-panel">
+        <summary class="collapse-title">
+          <span class="habit-icon"><svg class="line-icon" aria-hidden="true"><use href="#icon-supplement"></use></svg></span>
+          <span>补品</span><span id="supplement-count" class="badge badge-soft badge-primary supplement-count"></span>
+        </summary>
+        <div class="collapse-content supplement-content">
+          <blockquote class="habit-quote" id="supplement-quote"></blockquote>
+          <p id="supplement-message" hidden></p>
+          <ul id="supplement-items" class="supplement-items"></ul>
+          <button id="manage-supplements" class="btn btn-soft" type="button">管理补品</button>
+        </div>
       </details>
-    </section>
+      <details id="night-note" class="collapse collapse-arrow note-panel" hidden>
+        <summary class="collapse-title"><span>昨晚小记</span><time class="note-date" id="note-date"></time></summary>
+        <form id="note-form" class="collapse-content note-form">
+          <div class="time-field">
+            <label for="lights-out">大概几点关灯</label>
+            <input class="input" id="lights-out" name="lightsOut" type="time">
+          </div>
+          <fieldset class="snack-field">
+            <legend>吃夜宵了吗</legend>
+            <div class="snack-options">
+              <label><input name="snack" type="radio" value="yes"> 有</label>
+              <label><input name="snack" type="radio" value="no"> 没有</label>
+              <label><input name="snack" type="radio" value="" checked> 未记录</label>
+            </div>
+          </fieldset>
+          <div class="note-footer">
+            <button class="btn btn-soft" type="submit">保存小记</button>
+            <span id="note-feedback" role="status"></span>
+          </div>
+        </form>
+      </details>
+    </div>
     </div>
     <section class="history-view" id="history-view" aria-labelledby="heatmap-title" hidden>
       <div class="history-heading">
         <h1 id="heatmap-title" tabindex="-1">习惯足迹</h1>
         <div class="history-ranges" role="group" aria-label="统计范围">
-          <button type="button" data-range="week" aria-pressed="true">周</button>
-          <button type="button" data-range="month" aria-pressed="false">月</button>
+          <button type="button" data-range="week" aria-pressed="false">周</button>
+          <button type="button" data-range="month" aria-pressed="true">月</button>
           <button type="button" data-range="year" aria-pressed="false">年</button>
         </div>
       </div>
-      <div class="history-toolbar">
-        <div class="history-filter"><label for="history-habit">习惯</label><select id="history-habit" class="select"></select></div>
+      <div class="heatmap-panel">
+        <div class="history-filter">
+          <label class="sr-only" for="history-habit">选择习惯</label>
+          <select id="history-habit" class="select"></select>
+          <p class="heatmap-total" id="heatmap-total"></p>
+        </div>
         <div class="history-navigation">
           <button type="button" id="history-previous" class="btn btn-ghost" aria-label="上一周期">‹</button>
           <strong id="history-period" tabindex="-1"></strong>
           <button type="button" id="history-next" class="btn btn-ghost" aria-label="下一周期">›</button>
         </div>
-      </div>
-      <div class="heatmap-panel">
-        <div class="heatmap-header">
-          <p class="heatmap-total" id="heatmap-total"></p>
-          <div class="heatmap-legend" aria-label="图例">
-            <span><i class="done" aria-hidden="true"></i>已完成</span><span><i aria-hidden="true"></i>未完成</span><span><i class="future" aria-hidden="true"></i>未来</span>
-          </div>
-        </div>
         <div id="habit-heatmap"></div>
+        <div class="heatmap-footer">
+          <div class="heatmap-legend" role="group" aria-label="图例">
+            <span><i class="done" aria-hidden="true"></i>已记</span><span><i aria-hidden="true"></i>未记</span><span><i class="future" aria-hidden="true"></i>未来</span>
+          </div>
+          <p class="habit-consistency" id="habit-consistency"></p>
+        </div>
         <p id="heatmap-detail" role="status" class="muted"></p>
-        <p id="heatmap-hint" class="muted"></p>
       </div>
+      <details id="week-notes" class="collapse collapse-arrow week-notes" hidden>
+        <summary class="collapse-title">近期小记</summary>
+        <ul class="collapse-content" id="week-note-list"></ul>
+      </details>
     </section>
   </main>
   <div class="sr-only" id="action-announcement" role="status" aria-atomic="true"></div>
