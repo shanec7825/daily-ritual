@@ -1,4 +1,4 @@
-const { chromium } = require('C:/Program Files/WindowsApps/OpenAI.CodexPrimaryRuntime.v26-1112-737-0_26.1112.737.0_x64__3k8sg7r9htsxt/dependencies/node/node_modules/playwright');
+const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
 const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
 (async () => {
@@ -6,16 +6,21 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
   try {
     const context = await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true, timezoneId: 'Asia/Shanghai' });
     const page = await context.newPage();
-    await page.clock.setFixedTime(new Date('2026-11-20T10:00:00+08:00'));
+    await page.clock.install({ time: new Date('2026-11-20T10:00:00+08:00') });
     const errors = [];
     page.on('pageerror', error => errors.push(error.message));
     await page.goto(baseUrl);
     const waitForTitle = text => page.waitForFunction(expected => document.getElementById('action-title').textContent === expected, text);
+    const feedback = page.locator('#completion-feedback');
+    const sceneProgress = () => page.locator('#ritual-scene').evaluate(el => Number(getComputedStyle(el).getPropertyValue('--progress')));
     assert.equal(await page.locator('#history-view').isHidden(), true);
     assert.equal(await page.locator('#top-date').getAttribute('datetime'), '2026-11-20');
     assert.equal(await page.locator('#top-weekday').textContent(), '星期五');
     await page.locator('[data-mode-option="morning"]').click();
     assert.equal(await page.locator('#action-title').textContent(), '刷牙');
+    assert.equal(await feedback.isHidden(), true);
+    assert.equal(await sceneProgress(), 0);
+    assert.equal(await page.locator('.rising-sun').isVisible(), true);
     const confirmation = await page.evaluate(() => {
       const button = document.getElementById('complete-action');
       button.focus();
@@ -30,12 +35,15 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     });
     assert.deepEqual(confirmation, { title: '刷牙', feedback: true, count: '1 / 6', saved: 'done' });
     await waitForTitle('伸展一下');
+    assert.equal(await feedback.innerText(), '刚完成「刷牙」 · 今晨 1/6');
+    assert.equal(await sceneProgress(), 1 / 6);
     assert.equal(await page.evaluate(() => document.activeElement.id), 'action-title');
     await page.locator('#action-options summary').click();
     await page.locator('#skip-action').click();
     assert.equal(await page.locator('#action-title').textContent(), '阅读');
     await page.reload();
     assert.equal(await page.locator('#action-title').textContent(), '阅读');
+    assert.equal(await feedback.innerText(), '刚完成「刷牙」 · 今晨 1/6');
     await page.locator('#manage-habits').click();
     await page.locator('#habit-name').fill('练琴十分钟');
     await page.locator('#habit-form button').click();
@@ -52,6 +60,7 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     assert.equal(await page.locator('#action-title').textContent(), '练琴十分钟');
     await page.locator('#complete-action').click();
     await waitForTitle('闲走');
+    assert.equal(await feedback.innerText(), '刚完成「练琴十分钟」 · 今晨 2/7');
     await page.locator('#open-history').click();
     await page.waitForURL(/#footprints$/);
     await page.locator('#heatmap-title').waitFor();
@@ -95,13 +104,19 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
     // Complete every remaining item; skipped items remain available for later.
     while (await page.locator('#complete-action').isVisible()) {
       await page.locator('#complete-action').click();
-      await page.locator('#completion-feedback').waitFor({ state: 'hidden' });
+      await page.waitForFunction(() => !document.getElementById('complete-action').hasAttribute('aria-disabled'));
     }
-    assert.equal(await page.locator('#action-title').textContent(), '这一轮完成了');
+    assert.equal(await page.locator('#action-title').textContent(), '今晨完成 6 项');
+    assert.match(await page.locator('#action-description').textContent(), /1 项已跳过/);
+    assert.equal(await sceneProgress(), 6 / 7);
     await page.locator('[data-step="brush"]').click();
     await page.locator('#complete-action').click();
     assert.equal(await page.locator('#complete-action').getAttribute('aria-pressed'), 'false');
+    assert.equal(await sceneProgress(), 5 / 7);
     await page.locator('[data-mode-option="evening"]').click();
+    assert.equal(await feedback.isHidden(), true);
+    assert.equal(await sceneProgress(), 0);
+    assert.equal(await page.locator('.evening-window').isVisible(), true);
     assert.equal(await page.locator(`[data-step="${custom}"]`).count(), 0);
     // A second tab loads the same settings, then receives a storage event.
     const second = await context.newPage();
@@ -134,7 +149,13 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
       document.getElementById('complete-action').click();
       document.querySelector('[data-mode-option="morning"]').click();
     });
-    await waitForTitle('这一轮完成了');
+    await waitForTitle('今晨完成 6 项');
+    await page.locator('[data-step="stretch"]').click();
+    await page.locator('#complete-action').click();
+    await waitForTitle('今晨 7 项，全部完成');
+    assert.equal(await sceneProgress(), 1);
+    await page.reload();
+    await waitForTitle('今晨 7 项，全部完成');
     await page.locator('[data-mode-option="evening"]').click();
     assert.equal(await page.locator('#action-title').textContent(), '睡前刷牙');
     await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -143,6 +164,9 @@ const baseUrl = process.env.RITUAL_TEST_URL || 'http://127.0.0.1:8080';
       return document.getElementById('action-title').textContent;
     });
     assert.equal(reducedTitle, '呼吸或冥想');
+    assert.equal(await feedback.innerText(), '刚完成「睡前刷牙」 · 今晚 2/7');
+    assert.equal(await sceneProgress(), 2 / 7);
+    assert.equal(await page.locator('.lamplight').evaluate(el => getComputedStyle(el).transitionDuration), '0s');
 
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.evaluate(() => {

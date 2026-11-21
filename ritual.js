@@ -56,8 +56,30 @@ const Ritual = (() => {
 
   function currentAction(mode, actions, selected, store = {}) {
     const steps = getSteps(store, mode);
-    return steps.find(step => step.id === selected) ?? steps.find(step => !actions[step.id]) ??
-      { id: "finished", title: steps.length ? "这一轮完成了" : "添加一个小习惯", label: "本轮结束", prompt: steps.some(step => actions[step.id]?.status === "skipped") ? "还有跳过的习惯，点选列表即可补做。" : "可以休息一下，也可以点选习惯查看或撤销记录。" };
+    const current = steps.find(step => step.id === selected) ?? steps.find(step => !actions[step.id]);
+    if (current) return current;
+    if (!steps.length) return { id: "finished", title: "添加一个小习惯", label: "空列表", prompt: "从下方「管理」安排这个时段的习惯。" };
+    const { done, skipped } = roundProgress(steps, actions);
+    const period = mode === "morning" ? "今晨" : "今晚";
+    return {
+      id: "finished", label: "本轮结束",
+      title: skipped ? `${period}完成 ${done} 项` : `${period} ${done} 项，全部完成`,
+      prompt: skipped ? `还有 ${skipped} 项已跳过，点选习惯即可补做。` : "可以休息一下了。"
+    };
+  }
+
+  function roundProgress(steps, actions) {
+    let done = 0;
+    let skipped = 0;
+    let latest;
+    for (const step of steps) {
+      const entry = actions[step.id];
+      if (entry?.status === "done") {
+        done++;
+        if (!latest || entry.at > actions[latest.id].at) latest = step;
+      } else if (entry?.status === "skipped") skipped++;
+    }
+    return { done, skipped, latest };
   }
 
   function nextAction(store, mode, actions, id) {
@@ -170,5 +192,5 @@ const Ritual = (() => {
     actions[field] = entry;
   }
 
-  return { routines, getSteps, nextAction, heatmap, offsetDay, activeDay, defaultMode, getActions, currentAction, saveAction, saveNote, supplementChecks, setSupplementCheck, weekEnding, readEntry };
+  return { routines, getSteps, roundProgress, nextAction, heatmap, offsetDay, activeDay, defaultMode, getActions, currentAction, saveAction, saveNote, supplementChecks, setSupplementCheck, weekEnding, readEntry };
 })();

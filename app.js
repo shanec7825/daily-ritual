@@ -10,9 +10,8 @@
   const skip = byId("skip-action");
   const undoSkip = byId("undo-skip");
   const actionOptions = byId("action-options");
-  const actionIcon = byId("action-icon");
-  const heroIcon = byId("hero-icon");
-  const heroSuccess = byId("hero-success");
+  const scene = byId("ritual-scene");
+  const feedback = byId("completion-feedback");
   const actionCopy = byId("action-copy");
   const motionPreference = matchMedia("(prefers-reduced-motion: no-preference)");
   const moving = new Map();
@@ -135,19 +134,14 @@
   }
 
   function revealAction(direction = 1) {
-    const artwork = byId("action-card").dataset.state === "done" ? heroSuccess : heroIcon;
     animateUI(actionCopy, {
       opacity: [0.45, 1],
       transform: [`translateX(${direction * 10}px)`, "translateX(0px)"]
     }, { duration: 0.26, ease: [0.2, 0.65, 0.3, 1] });
-    animateUI(artwork, {
-      opacity: [0.4, 1],
-      transform: [`translateX(${direction * 14}px)`, "translateX(0px)"]
-    }, { duration: 0.3, ease: [0.2, 0.65, 0.3, 1] });
   }
 
   function confirmAction() {
-    animateUI(heroSuccess, {
+    animateUI(complete, {
       opacity: [0.5, 1], transform: ["scale(.86)", "scale(1)"]
     }, { duration: 0.19, ease: "easeOut" });
   }
@@ -197,7 +191,6 @@
     if (lastSkip && actions[lastSkip]?.status !== "skipped") lastSkip = undefined;
     const finished = step.id === "finished";
     byId("action-card").dataset.state = finished && choices.length ? "finished" : status ?? "ready";
-    actionIcon.setAttribute("href", `#icon-${finished ? "check" : stepIcon(step.id)}`);
     title.textContent = step.title;
     const description = byId("action-description");
     description.textContent = (done ? step.done : status === "skipped" ? "已跳过，可随时补做。" : step.prompt) ?? "";
@@ -209,7 +202,6 @@
     else complete.removeAttribute("aria-disabled");
     complete.disabled = finished;
     complete.hidden = finished;
-    byId("completion-feedback").hidden = !completion;
     startBreath.hidden = done || step.id !== "breath";
     const focused = document.activeElement;
     skip.hidden = finished || status !== undefined;
@@ -220,7 +212,11 @@
       fallback.focus({ preventScroll: true });
     }
 
-    const doneCount = choices.filter(item => actions[item.id]?.status === "done").length;
+    const { done: doneCount, latest } = Ritual.roundProgress(choices, actions);
+    scene.style.setProperty("--progress", choices.length ? doneCount / choices.length : 0);
+    feedback.hidden = !latest;
+    const period = mode === "morning" ? "今晨" : "今晚";
+    feedback.textContent = latest ? `刚完成「${latest.label}」${finished ? "" : ` · ${period} ${doneCount}/${choices.length}`}` : "";
     const meter = byId("routine-meter");
     meter.max = Math.max(1, choices.length);
     meter.value = doneCount;

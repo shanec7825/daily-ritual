@@ -36,4 +36,15 @@ assert.equal(R.heatmap(store, 'evening', 'supplement-0123456789abcdef01234567', 
 const original = JSON.stringify(store.habits);
 R.readEntry(store, 'habit-settings/morning', JSON.stringify([custom, custom]));
 assert.equal(JSON.stringify(store.habits), original);
+const configured = { habits: { morning: [custom, { id: 'read', label: '阅读' }, { id: 'brush', paused: true }] } };
+const actions = { brush: { status: 'done', at: 50 }, read: { status: 'skipped', at: 20 }, [custom.id]: { status: 'skipped', at: 30 } };
+const active = R.getSteps(configured, 'morning');
+assert.equal(R.currentAction('morning', actions, undefined, configured).title, '今晨完成 0 项');
+assert.equal(R.roundProgress(active, actions).latest, undefined);
+actions[custom.id] = { status: 'done', at: 10 };
+actions.read = { status: 'done', at: 5 };
+assert.equal(R.roundProgress(active, actions).latest.id, custom.id);
+delete actions[custom.id];
+assert.equal(R.roundProgress(active, actions).latest.id, 'read');
+assert.equal(R.currentAction('morning', {}, undefined, { habits: { morning: [] } }).title, '添加一个小习惯');
 console.log('PASS: progression, skip, finish, undo, custom persistence, order, pause, historical counts, leap dates, future dates, midnight rollover, supplements, invalid settings');

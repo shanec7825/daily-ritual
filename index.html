@@ -92,9 +92,19 @@
     <div class="dashboard">
       <div class="primary-lane">
         <section id="action-card" class="card card-border action-card" aria-labelledby="action-title">
-          <div class="hero-art" aria-hidden="true">
-            <svg class="line-icon hero-icon" id="hero-icon"><use id="action-icon" href="#icon-brush"></use></svg>
-            <svg class="line-icon hero-success" id="hero-success"><use href="#icon-check"></use></svg>
+          <div class="hero-art" id="ritual-scene" aria-hidden="true">
+            <div class="scene-print">
+              <div class="morning-landscape">
+                <i class="rising-sun"></i>
+                <i class="distant-hill"></i>
+                <i class="near-hill"></i>
+              </div>
+              <div class="evening-window">
+                <i class="window-stars"></i>
+                <i class="lamplight"></i>
+                <i class="window-frame"></i>
+              </div>
+            </div>
           </div>
           <div class="card-body hero-content">
             <div class="action-copy" id="action-copy">
@@ -106,7 +116,6 @@
               <button type="button" class="btn btn-primary btn-circle check-button" id="complete-action" aria-pressed="false">
                 <svg class="line-icon" aria-hidden="true"><use href="#icon-check"></use></svg>
               </button>
-              <span class="completion-feedback" id="completion-feedback" aria-hidden="true" hidden>已完成</span>
               <details id="action-options" class="action-options">
                 <summary class="btn btn-ghost btn-circle" aria-label="本项选项"><svg class="line-icon" aria-hidden="true"><use href="#icon-dots"></use></svg></summary>
                 <div class="action-tools">
@@ -115,6 +124,7 @@
                 </div>
               </details>
             </div>
+            <p class="completion-feedback" id="completion-feedback" hidden></p>
           </div>
         </section>
         <details id="night-note" class="collapse collapse-arrow note-panel" hidden>
